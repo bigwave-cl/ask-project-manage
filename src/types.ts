@@ -27,8 +27,9 @@ export type ProjectConfigItemModel = {
     children: ProjectItemModel[];
 };
 export enum CommandTypes {
-    open = 'ask-project-manage.openPanel',
-    close = 'ask-project-manage.closePanel',
+    open = "ask-project-manage.openPanel",
+    close = "ask-project-manage.closePanel",
+    toggleWebview = "ask-project-manage.toggleWebview",
 }
 export enum EventTypes {
     openPanel = 'ask-project-manage.openPanel',

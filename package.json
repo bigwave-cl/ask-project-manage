@@ -2,6 +2,8 @@
     "name": "ask-project-manage",
     "displayName": "ask-project-manage",
     "description": "a project manage panel",
+    "publisher": "ask-bobo",
+    "icon": "dist-webview-app/logo.png",
     "version": "0.0.1",
     "engines": {
         "vscode": "^1.95.0"
@@ -17,7 +19,8 @@
         "commands": [
             {
                 "command": "ask-project-manage.openPanel",
-                "title": "打开面板"
+                "title": "Open Ask Project Manager",
+                "category": "Project Management"
             }
         ]
     },
