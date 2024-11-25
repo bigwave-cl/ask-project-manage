@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { getRenderContent, buildStaticDist } from "./renderPage";
 import { useMessage } from "./useMessage";
+import { updateStatusBar } from "./statusBar";
 import { CommandTypes } from "../types";
 let panel: vscode.WebviewPanel | undefined;
 export const createPanel = (context: vscode.ExtensionContext) => {
@@ -28,10 +29,14 @@ export const createPanel = (context: vscode.ExtensionContext) => {
             panel,
             context,
         });
+        panel.onDidChangeViewState(e => {
+            updateStatusBar(e.webviewPanel.visible);
+        });
 
         // 监听 Webview 的关闭事件
         panel.onDidDispose(() => {
             panel = undefined; // 清理引用
+            updateStatusBar(false);
         });
     }
 };

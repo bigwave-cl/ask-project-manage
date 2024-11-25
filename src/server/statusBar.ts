@@ -31,7 +31,7 @@ export const crateStatusBar = (context: vscode.ExtensionContext) => {
 };
 
 // 更新状态栏图标和文字
-function updateStatusBar(isWebviewOpen: boolean) {
+export const updateStatusBar = (isWebviewOpen: boolean)=> {
     if (!statusBarItem) {
         return;
     }
