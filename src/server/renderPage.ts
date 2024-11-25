@@ -4,15 +4,19 @@ import * as fs from "fs";
 import type { RenderContentParams } from "../types";
 const config = {
     devUrl: "http://localhost:5173",
-    proDistPath: "/webview-app/dist/",
+    proDistPath: "/dist-webview-app/",
+    iconPath: "/dist-webview-app/logo.png",
 };
 
 const buildStaticDist = (context: vscode.ExtensionContext) => {
+    const iconPath = path.join(context.extensionPath, config.iconPath);
     const distPath = path.join(context.extensionPath, config.proDistPath);
     const distUriFile = vscode.Uri.file(distPath);
+    const iconUriFile = vscode.Uri.file(iconPath);
     return {
         distPath,
         distUriFile,
+        iconUriFile,
     };
 };
 
@@ -52,7 +56,7 @@ const getWebviewContent = (baseUri: string): string => {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Vue Webview</title>
+      <title>Ask Project Manage</title>
 	  <style>
 	  	html,body{
 			margin: 0;
@@ -64,7 +68,24 @@ const getWebviewContent = (baseUri: string): string => {
 	  </style>
     </head>
     <body>
-      <iframe src="${baseUri}" style="width: 100%; height: 100%; border: none;"></iframe>
+      <iframe id="myIframe" src="${baseUri}" style="width: 100%; height: 100%; border: none;"></iframe>
+      <script>
+            // 获取 VS Code API
+            const vscode = acquireVsCodeApi();
+            // 监听 iframe 加载完成，向 iframe 传递数据
+            const iframe = document.getElementById('myIframe');
+            window.addEventListener('message', event => {
+                const message = event.data;
+                if (message.from === 'webview' && message.to === 'vscode') {
+                    vscode.postMessage(message);
+                    return
+                }
+
+                if (message.from === 'vscode' && message.to === 'webview') {
+                    iframe.contentWindow.postMessage(message, '*')
+                }
+            });
+        </script>
     </body>
     </html>
   `;

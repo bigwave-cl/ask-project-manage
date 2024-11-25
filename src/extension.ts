@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { getRenderContent, buildStaticDist } from "./server/renderPage";
+import { useMessage } from "./server/useMessage";
 import { CommandTypes } from "./types";
 
 // This method is called when your extension is activated
@@ -17,16 +18,26 @@ export function activate(context: vscode.ExtensionContext) {
     const disposable = vscode.commands.registerCommand(CommandTypes.open, () => {
         // The code you place here will be executed every time your command is executed
         // Display a message box to the user
-        const { distPath, distUriFile } = buildStaticDist(context);
-        const panel = vscode.window.createWebviewPanel("vueApp", "Vue Webview", vscode.ViewColumn.One, {
+        const { distPath, distUriFile, iconUriFile } = buildStaticDist(context);
+        const panel = vscode.window.createWebviewPanel("vueApp", "Ask Project Manage", vscode.ViewColumn.One, {
             enableScripts: true, // 允许运行 JS
             retainContextWhenHidden: true, // 隐藏时保留上下文
             localResourceRoots: [distUriFile],
         });
+
+        // 设置图标
+        panel.iconPath = {
+            light: iconUriFile, // 浅色主题图标
+            dark: iconUriFile, // 深色主题图标
+        };
         panel.webview.html = getRenderContent({
             panel,
             distPath,
             distUriFile,
+        });
+        useMessage({
+            panel,
+            context,
         });
     });
 
