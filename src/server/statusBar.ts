@@ -6,6 +6,7 @@ export const crateStatusBar = (context: vscode.ExtensionContext) => {
     if (statusBarItem) {
         return statusBarItem;
     }
+
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.command = CommandTypes.toggleWebview;
     updateStatusBar(true);

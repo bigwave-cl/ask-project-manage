@@ -1,5 +1,5 @@
-import { ref, watch } from "vue";
-import { ProjectItemModel, ProjectGroupItemModel, ProjectConfigItemModel, FormDataModel } from "./types";
+import { onUnmounted, ref, watch } from "vue";
+import { ProjectItemModel, ProjectGroupItemModel, ProjectConfigItemModel, FormDataModel, EventTypes } from "./types";
 import {
     openWindow,
     chooseFolder,
@@ -8,6 +8,7 @@ import {
     updateProjectList,
     updateProjectListAll,
     removeProjectList,
+    useMessageObserver,
 } from "./postMessage";
 import { buildConfigChildrenNode, buildConfigNode } from "./utils";
 import InfoDialog from "./infoDialog.vue";
@@ -15,6 +16,7 @@ import { useToast } from "./toast";
 export const useWrap = () => {
     const sourceList = ref<ProjectConfigItemModel[]>([]);
     const list = ref<ProjectItemModel[]>([]);
+    const currentItemPath = ref("");
     const groupActiveType = ref("");
     const groupList = ref<ProjectGroupItemModel[]>([]);
     const initData = async () => {
@@ -196,11 +198,7 @@ export const useWrap = () => {
         if (!current) {
             return;
         }
-        const rule = [
-            'chooseFolder',
-            'chooseWorkspace',
-            'removeGroup',
-        ]
+        const rule = ["chooseFolder", "chooseWorkspace", "removeGroup"];
         if (rule.includes(type) && groupList.value.length === 0) {
             useToast("请先添加一个分组信息！！！");
             return;
@@ -216,6 +214,18 @@ export const useWrap = () => {
         onGroupChange();
     });
     initData();
+    const updateGlobalData = async () => {
+        await initData();
+        buildListByGroupActive();
+    };
+    const messageObserver = useMessageObserver();
+    messageObserver.add(EventTypes.updateConfigPanel, updateGlobalData);
+    messageObserver.add(EventTypes.updateWindowInfo, (data: { path: string })=>{
+        currentItemPath.value = data.path;
+    });
+    onUnmounted(() => {
+        messageObserver?.destroy();
+    });
     return {
         sourceList,
         list,

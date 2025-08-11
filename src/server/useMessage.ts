@@ -3,6 +3,7 @@ import type { MessageParams, CommandHandlerData, ProjectConfigItemModel } from "
 import { openFolder, chooseFolder } from "./folder.hook";
 import { openWorkspace, chooseWorkspace } from "./workspace.hook";
 import { useConfig } from "./config";
+import { postMessage } from "./panel";
 class MessageEventHandler {
     configInstance: ReturnType<typeof useConfig> | null = null;
     constructor(options: { panel: vscode.WebviewPanel; context: vscode.ExtensionContext }) {
@@ -88,11 +89,9 @@ const useMessage = (options: { panel: vscode.WebviewPanel; context: vscode.Exten
     panel.webview.onDidReceiveMessage(
         async message => {
             const response = await messageEventHandler.executeCommand(message);
-            panel.webview.postMessage({
+            postMessage(panel, {
                 command: message.command + "-callback",
                 data: response,
-                from: "vscode",
-                to: "webview",
             });
         },
         undefined,

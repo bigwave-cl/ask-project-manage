@@ -15,7 +15,9 @@
                     </template>
                 </EmptyText>
 
-                <div class="setting-list">
+                <ProjectSettingDraggable :list="renderList" @item-click="handleItemClick"/>
+
+                <!-- <div class="setting-list">
                     <template v-for="item in renderList">
                         <SettingItem :item="item" @item-click="handleItemClick"></SettingItem>
                         <div class="setting-wrap">
@@ -28,7 +30,7 @@
                             </div>
                         </div>
                     </template>
-                </div>
+                </div> -->
             </div>
         </div>
         <InfoDialog ref="infoDialogRef" @sure="sureEdit"></InfoDialog>
@@ -36,10 +38,11 @@
 </template>
 <script setup lang="ts">
 import { watch, ref, toRaw } from "vue";
-import SettingItem from "./settingItem.vue";
+// import SettingItem from "./settingItem.vue";
 import InfoDialog from "./infoDialog.vue";
 import EmptyText from "./empty.vue";
 import { ProjectConfigItemModel, FormDataModel } from "./types";
+import ProjectSettingDraggable from "./draggable.vue";
 defineOptions({
     name: "ProjectManageSetting",
 });
@@ -60,6 +63,7 @@ const emits = defineEmits<{
 }>();
 const handleItemClick = (item: { [key: string]: any }, type: string, parentId?: string) => {
     let _item = item as ProjectConfigItemModel | ProjectConfigItemModel["children"][number];
+    console.log('_item', _item,'=', parentId)
     if (type === "edit") {
         openEdit(_item, parentId);
     } else if (type === 'sort') {
@@ -258,10 +262,13 @@ const closeSetting = () => {
         overflow: auto;
         padding-top: 24px;
 
+        :deep() .draggable-container .draggable-list,
         :deep() .setting-list {
+            .draggable-wrap,
             .setting-wrap {
                 padding-left: 24px;
 
+                .draggable-list,
                 .setting-list {
                     display: grid;
                     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));

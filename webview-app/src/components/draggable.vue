@@ -1,62 +1,93 @@
 <template>
     <div class="draggable-container">
-        <transition-group tag="div" ref="draggableRef" class="draggable-container-box" name="flip-list">
-            <template v-for="(item, index) in list2" :key="item[itemKey]">
-                <div class="draggable-wrap" :data-id="item[itemKey]" :data-index="index">
-                    <slot name="item" :item="item"></slot>
+        <VueDraggable
+            class="draggable-list"
+            tag="div"
+            :list="list"
+            :group="{
+                group: group,
+                put: false
+            }"
+            v-bind="dragOptions"
+            @start="onDragStart"
+            @end="isDrag = false"
+            :item-key="itemKey">
+            <template #item="{ element: item }">
+                <div class="draggable-item">
+                    <SettingItem :item="item" @item-click="handleClick"></SettingItem>
+                    <template v-if="item.children && item.children.length > 0">
+                        <div class="draggable-wrap">
+                            <ProjectSettingDraggable :list="item.children" :group="'p'+item[itemKey]" :item-key="itemKey" @item-click="(subItem, type)=> {
+                                handleClick(subItem, type, item[itemKey])
+                            }"/>
+                        </div>
+                    </template>
                 </div>
             </template>
-        </transition-group>
+        </VueDraggable>
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-// import Sortable from 'sortablejs';
-defineOptions({
-    name: "ProjectSettingDraggable"
-})
-const props = withDefaults(defineProps<{
-    list: any[],
-    itemKey?: string
-}>(), {
-    list: () => {
-        return []
-    },
-    itemKey: 'key'
-})
-const draggableRef = ref<any>(null);
-const draggableInstance = ref<any>(null);
-const list2 = ref<any[]>([])
-onMounted(() => {
-    if (draggableRef.value) {
-        list2.value = JSON.parse(JSON.stringify(props.list))
-        draggableInstance.value = initDrag();
+    import { ref } from "vue";
+    import VueDraggable from "vuedraggable";
+    import SettingItem from "./settingItem.vue";
+    defineOptions({
+        name: "ProjectSettingDraggable",
+    });
+    withDefaults(
+        defineProps<{
+            list: any[];
+            group?: string;
+            itemKey?: string;
+        }>(),
+        {
+            list: () => {
+                return [];
+            },
+            group: "p1",
+            itemKey: "key",
+        }
+    );
+    const isDrag = ref(false);
+    const dragOptions = ref({
+        animation: 200,
+        handle: ".handle",
+        disabled: false,
+        ghostClass: "ghost",
+    });
+
+    const emits = defineEmits<{
+        'item-click': [item: any, type: string, pId?: string]
+    }>()
+    const handleClick = (item: any, type: string, pId?: string) => {
+        emits("item-click", item, type, pId)
     }
-})
-const initDrag = () => {
-    if (!draggableRef.value) { return null }
-    // console.log('draggableRef.value', draggableRef.value)
-    // const sortable = new Sortable(draggableRef.value.$el, {
-    //     group: {
-    //         name: "g1", // 分组名
-    //         pull: true, // 允许拖拽进入其他列表
-    //         put: true,  // 允许从其他列表接收项
-    //     },
-    //     handle: ".handle",
-    //     draggable: ".draggable-wrap",
-    //     // ...props.options,
-    //     onEnd: (evt: any) => {
-    //         const newList = list2.value;
-    //         console.log('evt', evt)
-    //         const [movedItem] = newList.splice(evt.oldIndex, 1);
-    //         newList.splice(evt.newIndex, 0, movedItem);
-    //     },
-    //     onMove: (evt: any) => {
-    //         console.log('move-evt', evt)
-    //     }
-    //     // onStart: (evt) => emit("drag-start", evt),
-    // })
-    // console.log('sortable', sortable)
-    // return shallowRef(sortable)
-}
+    const handleClone = (event: any) => {
+        const cloneNode = event.item.cloneNode(true);
+        console.dir(cloneNode.childNodes[0])
+        return cloneNode.childNodes[0];
+    }
+    const onDragStart = (event: any) => {
+        isDrag.value = true;
+        console.log('event', event)
+        const cloneNode = event.item.cloneNode(true);
+        console.dir(cloneNode.childNodes[0])
+        event.dataTransfer.setData('text/html', cloneNode.childNodes[0]);
+    }
 </script>
+<style lang="scss" scoped>
+    :deep(.draggable-container) {
+        .flip-list-move {
+            transition: transform 0.5s;
+        }
+
+        .no-move {
+            transition: transform 0s;
+        }
+
+        .ghost {
+            opacity: 0.5;
+            background: #c8ebfb;
+        }
+    }
+</style>

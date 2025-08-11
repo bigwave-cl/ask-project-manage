@@ -32,6 +32,8 @@ export enum CommandTypes {
     toggleWebview = "ask-project-manage.toggleWebview",
 }
 export enum EventTypes {
-    openPanel = 'ask-project-manage.openPanel',
-    closePanel = 'ask-project-manage.closePanel',
+    openPanel = "ask-project-manage.openPanel",
+    closePanel = "ask-project-manage.closePanel",
+    updateConfigPanel = "ask-project-manage.updateConfigPanel",
+    updateWindowInfo = "ask-project-manage.updateWindowInfo",
 }

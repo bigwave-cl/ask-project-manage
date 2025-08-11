@@ -49,46 +49,66 @@ const getProRenderContent = (options: RenderContentParams) => {
 /**
  * 构建 Webview 的 HTML 内容
  */
-const getWebviewContent = (baseUri: string): string => {
-    return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Ask Project Manage</title>
-	  <style>
-	  	html,body{
-			margin: 0;
-			padding: 0;
-			Height: 100%;
-			width: 100%;
-			overflow: hidden;
-		}
-	  </style>
-    </head>
-    <body>
-      <iframe id="myIframe" src="${baseUri}" style="width: 100%; height: 100%; border: none;"></iframe>
-      <script>
-            // 获取 VS Code API
-            const vscode = acquireVsCodeApi();
-            // 监听 iframe 加载完成，向 iframe 传递数据
-            const iframe = document.getElementById('myIframe');
-            window.addEventListener('message', event => {
-                const message = event.data;
-                if (message.from === 'webview' && message.to === 'vscode') {
-                    vscode.postMessage(message);
-                    return
-                }
+const getWebviewContent = async (baseUri: string): Promise<string> => {
+    try {
+        // 获取入口 HTML 内容
+        const response = await fetch(`${baseUri}/`);
+        const htmlContent = await response.text();
 
-                if (message.from === 'vscode' && message.to === 'webview') {
-                    iframe.contentWindow.postMessage(message, '*')
-                }
-            });
-        </script>
-    </body>
-    </html>
-  `;
+        // 将 HTML 内容注入 Webview 中
+        return htmlContent.replace(/<head>/, `<head><base href="${baseUri}/">`);;
+    } catch (error) {
+        console.error("Failed to fetch HTML content:", error);
+        return `<h1>无法加载内容</h1>`;
+    }
+//     return `
+//     <!DOCTYPE html>
+//     <html lang="en">
+//     <head>
+//       <meta charset="UTF-8">
+//       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//       <title>Ask Project Manage</title>
+// 	  <style>
+// 	  	html,body{
+// 			margin: 0;
+// 			padding: 0;
+// 			Height: 100%;
+// 			width: 100%;
+// 			overflow: hidden;
+// 		}
+// 	  </style>
+//     </head>
+//     <body>
+//       <iframe id="myIframe" src="${baseUri}" style="width: 100%; height: 100%; border: none;" dropzone sandbox="allow-scripts allow-same-origin allow-modals allow-forms" ></iframe>
+//       <script>
+//             // 获取 VS Code API
+//             const vscode = acquireVsCodeApi();
+//             // 监听 iframe 加载完成，向 iframe 传递数据
+//             const iframe = document.getElementById('myIframe');
+//             // iframe.addEventListener("dragover", (e) => e.preventDefault());
+//             console.log('iframe.contentWindow', iframe.contentWindow)
+//             iframe.contentWindow.addEventListener("dragover", (e) => {
+//                 console.log('dragover-iframe-teset', e);
+//                 e.preventDefault()
+//                 e.stopPropagation()
+//                 // iframe.dispatchEvent(new CustomEvent("dragover", { detail: event }));
+//             });
+//             iframe.contentWindow.addEventListener("drop", (e) => e.preventDefault());
+//             window.addEventListener('message', event => {
+//                 const message = event.data;
+//                 if (message.from === 'webview' && message.to === 'vscode') {
+//                     vscode.postMessage(message);
+//                     return
+//                 }
+
+//                 if (message.from === 'vscode' && message.to === 'webview') {
+//                     iframe.contentWindow.postMessage(message, '*')
+//                 }
+//             });
+//         </script>
+//     </body>
+//     </html>
+//   `;
 };
 
 export { getRenderContent, buildStaticDist };

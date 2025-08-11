@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { createPanel, openPanel } from "./server/panel";
+import { useWindowState } from "./server/useWindowState";
 import { crateStatusBar } from "./server/statusBar";
 import { CommandTypes } from "./types";
 
@@ -16,14 +17,13 @@ export function activate(context: vscode.ExtensionContext) {
     // Now provide the implementation of the command with registerCommand
     // The commandId parameter must match the command field in package.json
     crateStatusBar(context);
+    useWindowState();
     const disposable = vscode.commands.registerCommand(CommandTypes.open, () => {
         // The code you place here will be executed every time your command is executed
         // Display a message box to the user
         createPanel(context);
     });
-
     context.subscriptions.push(disposable);
-
     setTimeout(() => {
         openPanel();
     }, 0);

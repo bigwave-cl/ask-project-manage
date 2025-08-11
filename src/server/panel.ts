@@ -2,9 +2,10 @@ import * as vscode from "vscode";
 import { getRenderContent, buildStaticDist } from "./renderPage";
 import { useMessage } from "./useMessage";
 import { updateStatusBar } from "./statusBar";
-import { CommandTypes } from "../types";
+import { CommandTypes, EventTypes, MessageParams } from "../types";
 let panel: vscode.WebviewPanel | undefined;
-export const createPanel = (context: vscode.ExtensionContext) => {
+let panelVisible: boolean = false;
+export const createPanel = async (context: vscode.ExtensionContext) => {
     if (panel) {
         panel.reveal(); // 如果面板已经打开，聚焦到该面板
     } else {
@@ -20,7 +21,7 @@ export const createPanel = (context: vscode.ExtensionContext) => {
             light: iconUriFile, // 浅色主题图标
             dark: iconUriFile, // 深色主题图标
         };
-        panel.webview.html = getRenderContent({
+        panel.webview.html = await getRenderContent({
             panel,
             distPath,
             distUriFile,
@@ -31,21 +32,50 @@ export const createPanel = (context: vscode.ExtensionContext) => {
         });
         panel.onDidChangeViewState(e => {
             updateStatusBar(e.webviewPanel.visible);
+            panelVisible = e.webviewPanel.visible;
         });
+        panelVisible = true;
 
         // 监听 Webview 的关闭事件
         panel.onDidDispose(() => {
             panel = undefined; // 清理引用
             updateStatusBar(false);
+            panelVisible = false;
         });
     }
 };
+const notifyWindowInfo = ()=> {
+
+    const workspaceFile = vscode.workspace.workspaceFile;
+    const isWorkSpace = !!workspaceFile;
+    const fsPath = vscode.workspace.workspaceFolders;
+    const windowPath = isWorkSpace ? workspaceFile : fsPath ? fsPath[0].uri.fsPath : '';
+    postMessage(panel!, {
+        command: EventTypes.updateWindowInfo,
+        data: {
+            path: windowPath,
+        },
+    });
+}
 export const destroyPanel = () => {
     panel?.dispose();
     panel = undefined; // 清理引用
 };
+export const getPanelVisible = () => {
+    return panelVisible;
+};
 export const getPanel = () => {
     return panel;
+};
+
+// command目前只有useMessage带了command后缀的方法以及../types.ts定义的EventTypes
+export const postMessage = (currentPanel: vscode.WebviewPanel, msg: MessageParams<any>) => {
+    return currentPanel.webview.postMessage({
+        command: msg.command,
+        data: msg.data,
+        from: "vscode",
+        to: "webview",
+    });
 };
 
 export const openPanel = () => {

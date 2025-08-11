@@ -2,7 +2,7 @@
     <div class="setting-item">
         <div class="setting-item__label">{{ item.label || item.name }}</div>
         <div class="setting-item__btns">
-            <!-- <v-btn icon="mdi-drag" class="handle" @click="handleClick(item, 'sort')"></v-btn> -->
+            <v-btn icon="mdi-drag" class="handle"></v-btn>
             <v-btn icon="mdi-order-numeric-ascending" class="handle" @click="handleClick(item, 'sort')"></v-btn>
             <v-btn icon="mdi-clipboard-edit-outline" @click="handleClick(item, 'edit')"></v-btn>
             <v-btn icon="mdi-trash-can-outline" color="pink-lighten-1" @click="handleClick(item, 'remove')"></v-btn>

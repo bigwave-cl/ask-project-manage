@@ -1,26 +1,28 @@
-import type { CommandHandlerData, MessageParams, ProjectConfigItemModel } from "./types";
-const isDev = import.meta.env.DEV;
+import type { CommandHandlerData, MessageParams, ProjectConfigItemModel, EventTypes } from "./types";
+// const isDev = import.meta.env.DEV;
 type PostMessageVsCodeModel = {
     postMessage: (opt: { command: string; data: any; from: "webview" | "vscode"; to: "webview" | "vscode" }) => void;
 };
 let PostMessageVsCode: PostMessageVsCodeModel | null = null;
 const getVscode = () => {
-    if (PostMessageVsCode) return PostMessageVsCode;
-    if (isDev) {
-        if (window && window.parent) {
-            PostMessageVsCode = {
-                postMessage: opt => {
-                    window.parent.postMessage(opt, "*");
-                },
-            };
-        }
-    } else {
-        // @ts-ignore
-        if (window.acquireVsCodeApi) {
-            // @ts-ignore
-            PostMessageVsCode = window.acquireVsCodeApi();
-        }
+    if (PostMessageVsCode) {
+        return PostMessageVsCode;
     }
+    // if (isDev) {
+    //     if (window && window.parent) {
+    //         PostMessageVsCode = {
+    //             postMessage: opt => {
+    //                 window.parent.postMessage(opt, "*");
+    //             },
+    //         };
+    //     }
+    // } else {
+    // @ts-ignore
+    if (window.acquireVsCodeApi) {
+        // @ts-ignore
+        PostMessageVsCode = window.acquireVsCodeApi();
+    }
+    // }
     return PostMessageVsCode;
 };
 const promisePostMessage = <T extends any, K extends any>(
@@ -44,7 +46,6 @@ const promisePostMessage = <T extends any, K extends any>(
         });
         const handler = (event: MessageEvent<any>) => {
             const message = event.data as MessageParams<T>;
-            console.log("message-receive", message);
             if (message.command === options.command + "-callback") {
                 window.removeEventListener("message", handler);
                 resolve(message.data as CommandHandlerData<K>);
@@ -126,6 +127,81 @@ const chooseWorkspace = () => {
         data: {},
     });
 };
+
+type EventCachesModel = {
+    command: string;
+    handlers: Function[];
+};
+const eventCaches: EventCachesModel[] = [];
+let messageObserverInstance: ReturnType<typeof crateMessageObserver> | null = null;
+const crateMessageObserver = () => {
+    const messageHandler = (msgEvent: MessageEvent<any>) => {
+        const message = msgEvent.data as MessageParams<any>;
+        console.log("message", message, eventCaches);
+        eventCaches.forEach(event => {
+            if (message.command === event.command) {
+                event.handlers.forEach(handler => {
+                    handler(message.data);
+                });
+            }
+        });
+    };
+    window.addEventListener("message", messageHandler);
+    const add = (type: EventTypes, handler: Function) => {
+        const index = eventCaches.findIndex(event=> event.command === type);
+        let curEvent: EventCachesModel = {
+            command: type,
+            handlers: [],
+        };
+        if(index !== -1){
+            curEvent.handlers = eventCaches[index].handlers.slice();
+        }
+        curEvent.handlers.push(handler);
+        if(index === -1 ){
+            eventCaches.push(curEvent);
+        }else{
+            eventCaches[index] = curEvent;
+        }
+    };
+    const remove = (type: EventTypes, handler?: Function) => {
+        const index = eventCaches.findIndex(event => event.command === type);
+        if(index === -1){
+            return;
+        }
+        if(!handler){
+            eventCaches.splice(index, 1);
+            return;
+        }
+        const handlers = eventCaches[index].handlers.slice();
+        const hIndex = handlers.findIndex(_handler => _handler === handler);
+        if(hIndex === -1 ){
+            return;
+        }
+        handlers.splice(hIndex, 1);
+        eventCaches[index].handlers = handlers;
+    };
+    const clear = () => {
+        eventCaches.length = 0;
+    };
+    const destroy = () => {
+        window.removeEventListener("message", messageHandler);
+        clear();
+        messageObserverInstance = null;
+    };
+    return {
+        add,
+        remove,
+        clear,
+        destroy,
+    };
+};
+const useMessageObserver = ()=> {
+    if(messageObserverInstance) {
+        return messageObserverInstance;
+    }
+    messageObserverInstance = crateMessageObserver();
+    return messageObserverInstance;
+};
 export {
     openWindow,
     chooseFolder,
@@ -135,4 +211,5 @@ export {
     updateProjectListAll,
     removeProjectList,
     clearProjectList,
+    useMessageObserver,
 };

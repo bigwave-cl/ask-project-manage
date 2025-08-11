@@ -73,6 +73,9 @@ const {
 
     .apm-list {
         width: 100%;
+        height: 100%;
+        min-width: 300px;
+        overflow-y: auto;
     }
 }
 </style>

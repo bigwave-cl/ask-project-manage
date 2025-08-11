@@ -1,10 +1,10 @@
 {
     "name": "ask-project-manage",
-    "displayName": "ask-project-manage",
+    "displayName": "Ask Project Manage",
     "description": "a project manage panel",
     "publisher": "ask-bobo",
     "icon": "dist-webview-app/logo.png",
-    "version": "0.0.3",
+    "version": "0.0.5",
     "engines": {
         "vscode": "^1.95.0"
     },

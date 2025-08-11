@@ -14,6 +14,8 @@ export enum CommandTypes {
 export enum EventTypes {
     openPanel = "ask-project-manage.openPanel",
     closePanel = "ask-project-manage.closePanel",
+    updateConfigPanel = "ask-project-manage.updateConfigPanel",
+    updateWindowInfo = "ask-project-manage.updateWindowInfo",
 }
 export type ProjectItemModel = {
     name: string;
