@@ -115,9 +115,9 @@ const openWorkSpace = (url: string) => {
 };
 const openWindow = (type: "workspace" | "folder", url: string) => {
     if (type === "workspace") {
-        return openFolder(url);
-    } else {
         return openWorkSpace(url);
+    } else {
+        return openFolder(url);
     }
 };
 

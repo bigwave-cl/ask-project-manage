@@ -1,5 +1,12 @@
-import { onUnmounted, ref, watch } from "vue";
-import { ProjectItemModel, ProjectGroupItemModel, ProjectConfigItemModel, FormDataModel, EventTypes } from "./types";
+import { computed, onUnmounted, ref, watch } from "vue";
+import {
+    ProjectItemModel,
+    ProjectGroupItemModel,
+    ProjectConfigItemModel,
+    ProjectRenderItemModel,
+    FormDataModel,
+    EventTypes,
+} from "./types";
 import {
     openWindow,
     chooseFolder,
@@ -15,48 +22,83 @@ import InfoDialog from "./infoDialog.vue";
 import { useToast } from "./toast";
 export const useWrap = () => {
     const sourceList = ref<ProjectConfigItemModel[]>([]);
-    const list = ref<ProjectItemModel[]>([]);
+    const list = ref<ProjectRenderItemModel[]>([]);
     const currentItemPath = ref("");
-    const groupActiveType = ref("");
+    const groupActiveType = ref("all");
+    const searchKeyword = ref("");
     const groupList = ref<ProjectGroupItemModel[]>([]);
+    const currentGroupLabel = computed(() => {
+        if (groupActiveType.value === "all") {
+            return "全部分组";
+        }
+        return groupList.value.find(cur => cur.key === groupActiveType.value)?.label || "未选择分组";
+    });
+    const totalProjectCount = computed(() => {
+        return sourceList.value.reduce((total, group) => total + group.children.length, 0);
+    });
+    const workspaceCount = computed(() => {
+        return sourceList.value.reduce((total, group) => {
+            return total + group.children.filter(item => item.type === "workspace").length;
+        }, 0);
+    });
+    const folderCount = computed(() => totalProjectCount.value - workspaceCount.value);
     const initData = async () => {
         const response = await getConfigList();
         sourceList.value = response.data;
         buildGroupList();
-        groupActiveType.value = groupActiveType.value || (groupList.value[0] ? groupList.value[0].key : "");
+        if (groupActiveType.value !== "all" && groupList.value.findIndex(cur => cur.key === groupActiveType.value) === -1) {
+            groupActiveType.value = "all";
+        }
+        buildListByGroupActive();
     };
     const buildGroupList = () => {
-        groupList.value = sourceList.value.map(cur => {
-            return {
-                key: cur.key,
-                label: cur.label,
-            };
-        });
+        groupList.value = [
+            {
+                key: "all",
+                label: "全部",
+            },
+            ...sourceList.value.map(cur => {
+                return {
+                    key: cur.key,
+                    label: cur.label,
+                };
+            }),
+        ];
+    };
+    const normalizeText = (value: string) => value.toLocaleLowerCase().trim();
+    const isSamePath = (currentPath: string, itemPath: string) => {
+        if (!currentPath || !itemPath) {
+            return false;
+        }
+        return currentPath === itemPath || currentPath.endsWith(itemPath) || itemPath.endsWith(currentPath);
     };
     const buildListByGroupActive = () => {
-        list.value = [];
-        const index = sourceList.value.findIndex(cur => cur.key === groupActiveType.value);
-        if (index === -1) {
-            return;
-        }
-        list.value = sourceList.value[index].children.map((cur, i) => {
-            return {
-                ...cur,
-                // source: cur.source,
-                sort: i,
-            };
+        const keyword = normalizeText(searchKeyword.value);
+        const renderGroups =
+            groupActiveType.value === "all"
+                ? sourceList.value
+                : sourceList.value.filter(cur => cur.key === groupActiveType.value);
+
+        list.value = renderGroups.flatMap(group => {
+            return group.children
+                .map((cur, i) => {
+                    return {
+                        ...cur,
+                        sort: i,
+                        groupKey: group.key,
+                        groupLabel: group.label,
+                        isCurrent: isSamePath(currentItemPath.value, cur.path),
+                    };
+                })
+                .filter(cur => {
+                    if (!keyword) {
+                        return true;
+                    }
+                    return [cur.name, cur.path, cur.source, cur.groupLabel, cur.type].some(value => {
+                        return normalizeText(value || "").includes(keyword);
+                    });
+                });
         });
-        // list.value = Array.from({ length: 10 }).map((cur, i) => {
-        //     const res: ProjectItemModel = {
-        //         type: "folder",
-        //         name: "我是name" + i + groupActiveType.value,
-        //         key: "我是key" + i + groupActiveType.value,
-        //         source: "我是source" + i + groupActiveType.value,
-        //         path: "我是path" + i + groupActiveType.value,
-        //         sort: i,
-        //     };
-        //     return res;
-        // });
     };
     const onGroupChange = () => {
         buildListByGroupActive();
@@ -64,7 +106,35 @@ export const useWrap = () => {
     const handleItemClick = (item: ProjectItemModel) => {
         openWindow(item.type, item.path);
     };
+    const copyProjectPath = async (item: ProjectItemModel) => {
+        try {
+            await navigator.clipboard.writeText(item.path);
+            useToast("路径已复制");
+        } catch (error) {
+            useToast("复制失败，请在详情里手动复制");
+        }
+    };
+    const removeProject = async (item: ProjectRenderItemModel) => {
+        await removeProjectByGroup(item.groupKey, [item.key]);
+        useToast("项目已删除");
+    };
+    const editProject = (item: ProjectRenderItemModel) => {
+        infoDialogRef.value?.openEdit({
+            title: "编辑项目符名",
+            nameLabel: "项目名称",
+            name: item.name,
+            groupKey: item.groupKey,
+            listKey: item.key,
+            subInfo: "project-name",
+        });
+    };
     const addProjectByGroup = async (data: string[], type: ProjectItemModel["type"]) => {
+        if (groupActiveType.value === "all" && sourceList.value.length === 0) {
+            await addGroup("默认分组");
+        }
+        if (groupActiveType.value === "all" && sourceList.value[0]) {
+            groupActiveType.value = sourceList.value[0].key;
+        }
         const currentIndex = sourceList.value.findIndex(cur => cur.key === groupActiveType.value);
         if (currentIndex === -1) {
             return;
@@ -110,6 +180,10 @@ export const useWrap = () => {
         updateProjectList(item);
     };
     const removeGroup = async (key: string) => {
+        if (key === "all") {
+            useToast("请选择一个具体分组");
+            return;
+        }
         await removeProjectList(key);
         const index = sourceList.value.findIndex(cur => cur.key === key);
         if (index !== -1) {
@@ -129,6 +203,20 @@ export const useWrap = () => {
     };
     const infoDialogRef = ref<InstanceType<typeof InfoDialog> | null>(null);
     const onInfoDialogSure = (formData: FormDataModel) => {
+        if (formData.subInfo === "project-name") {
+            const currentIndex = sourceList.value.findIndex(cur => cur.key === formData.groupKey);
+            if (currentIndex !== -1) {
+                const current = sourceList.value[currentIndex];
+                const subIndex = current.children.findIndex(cur => cur.key === formData.listKey);
+                if (subIndex !== -1) {
+                    current.children[subIndex].name = formData.name || "";
+                    updateProjectListAll(sourceList.value);
+                    buildListByGroupActive();
+                }
+            }
+            infoDialogRef.value?.resetEditForm();
+            return;
+        }
         addGroup(formData.name || "");
         infoDialogRef.value?.resetEditForm();
     };
@@ -198,7 +286,7 @@ export const useWrap = () => {
         if (!current) {
             return;
         }
-        const rule = ["chooseFolder", "chooseWorkspace", "removeGroup"];
+        const rule = ["removeGroup"];
         if (rule.includes(type) && groupList.value.length === 0) {
             useToast("请先添加一个分组信息！！！");
             return;
@@ -213,6 +301,9 @@ export const useWrap = () => {
     watch(groupActiveType, () => {
         onGroupChange();
     });
+    watch(searchKeyword, () => {
+        buildListByGroupActive();
+    });
     initData();
     const updateGlobalData = async () => {
         await initData();
@@ -222,6 +313,7 @@ export const useWrap = () => {
     messageObserver.add(EventTypes.updateConfigPanel, updateGlobalData);
     messageObserver.add(EventTypes.updateWindowInfo, (data: { path: string })=>{
         currentItemPath.value = data.path;
+        buildListByGroupActive();
     });
     onUnmounted(() => {
         messageObserver?.destroy();
@@ -229,10 +321,18 @@ export const useWrap = () => {
     return {
         sourceList,
         list,
+        searchKeyword,
         groupActiveType,
         groupList,
+        currentGroupLabel,
+        totalProjectCount,
+        workspaceCount,
+        folderCount,
         onGroupChange,
         handleItemClick,
+        copyProjectPath,
+        removeProject,
+        editProject,
         handleChooseFolderClick,
         handleChooseWorkspaceClick,
         removeProjectByGroup,

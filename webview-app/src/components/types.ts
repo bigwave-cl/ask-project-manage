@@ -25,6 +25,11 @@ export type ProjectItemModel = {
     sort: number;
     type: "workspace" | "folder";
 };
+export type ProjectRenderItemModel = ProjectItemModel & {
+    groupKey: string;
+    groupLabel: string;
+    isCurrent?: boolean;
+};
 export type ProjectGroupItemModel = {
     label: string;
     key: string;

@@ -62,11 +62,6 @@
     const handleClick = (item: any, type: string, pId?: string) => {
         emits("item-click", item, type, pId)
     }
-    const handleClone = (event: any) => {
-        const cloneNode = event.item.cloneNode(true);
-        console.dir(cloneNode.childNodes[0])
-        return cloneNode.childNodes[0];
-    }
     const onDragStart = (event: any) => {
         isDrag.value = true;
         console.log('event', event)

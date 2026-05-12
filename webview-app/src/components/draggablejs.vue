@@ -6,7 +6,7 @@
                     draggable="true"
                     class="draggable-item"
                     @dragstart="onDragStart(index)"
-                    @dragover="onDragOver($event, index)"
+                    @dragover="onDragOver($event)"
                     @drop="onDrop($event, index)"
                     @dragend="onDragEnd">
                     {{ item.name }}
@@ -38,7 +38,7 @@
     };
 
     // 拖拽到目标位置时，阻止默认行为
-    const onDragOver = (event: DragEvent, index: number) => {
+    const onDragOver = (event: DragEvent) => {
         console.log('onDragOver-index', event)
         event.preventDefault();
         event.stopPropagation();
