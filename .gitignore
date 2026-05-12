@@ -27,3 +27,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+dist-webview-app/*
+dist-webview-app/index.html

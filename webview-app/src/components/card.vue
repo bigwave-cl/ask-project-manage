@@ -2,7 +2,7 @@
     <article
         class="ask-project-manage-card"
         :class="{ 'ask-project-manage-card--current': item.isCurrent }"
-        :style="cardStyle"
+        :style="{ ...cardStyle, ...gridStyle }"
         @click="handleClick(item)"
     >
         <div class="ask-project-manage-card__box">
@@ -18,14 +18,14 @@
                 </div>
                 <v-menu location="bottom end">
                     <template v-slot:activator="{ props }">
-                        <v-btn
-                            v-bind="props"
-                            class="ask-project-manage-card__more"
-                            icon="mdi-dots-vertical"
-                            size="small"
-                            variant="text"
-                            @click.stop
-                        ></v-btn>
+	                        <v-btn
+	                            v-bind="props"
+	                            class="ask-project-manage-card__more"
+	                            icon="mdi-dots-vertical"
+	                            size="x-small"
+	                            variant="text"
+	                            @click.stop
+	                        ></v-btn>
                     </template>
                     <v-list density="compact" class="ask-project-manage-card__menu">
                         <v-list-item prepend-icon="mdi-open-in-new" title="打开项目" @click="handleClick(item)"></v-list-item>
@@ -60,11 +60,13 @@ defineOptions({
 const props = withDefaults(
     defineProps<{
         item: ProjectRenderItemModel;
+        gridStyle?: Record<string, string>;
     }>(),
     {
         item: () => {
             return {} as ProjectRenderItemModel;
         },
+        gridStyle: () => ({}),
     }
 );
 
@@ -76,12 +78,12 @@ const emits = defineEmits<{
 }>();
 
 const palettes = [
-    { primary: "#42f5c8", secondary: "#15a6ff", element: "青木" },
-    { primary: "#ffcc66", secondary: "#ff5e8a", element: "赤金" },
-    { primary: "#8ea7ff", secondary: "#c77dff", element: "玄水" },
-    { primary: "#a6ff68", secondary: "#00d4ff", element: "灵木" },
-    { primary: "#ff8a3d", secondary: "#ffe66d", element: "离火" },
-    { primary: "#f075ff", secondary: "#5fe4ff", element: "幻雷" },
+    { primary: "var(--apm-radio-silence)", secondary: "var(--apm-faded-letter)", element: "青木" },
+    { primary: "var(--apm-riviera)", secondary: "var(--apm-swan-dive)", element: "赤金" },
+    { primary: "var(--apm-late-homework)", secondary: "var(--apm-radio-silence)", element: "玄水" },
+    { primary: "var(--apm-spring-awakening)", secondary: "var(--apm-swan-dive)", element: "灵木" },
+    { primary: "var(--apm-our-little-secret)", secondary: "var(--apm-dinner-party)", element: "离火" },
+    { primary: "var(--apm-mamas-new-bag)", secondary: "var(--apm-riviera)", element: "幻雷" },
 ];
 
 const hashText = (value: string) => {
@@ -154,10 +156,10 @@ const handleRemove = (item: ProjectRenderItemModel) => {
     position: relative;
     border: 1px solid color-mix(in srgb, var(--seal-primary) 32%, transparent);
     border-radius: 18px;
-    background:
-        linear-gradient(135deg, color-mix(in srgb, var(--seal-primary) 10%, transparent), transparent 48%),
-        linear-gradient(160deg, rgba(13, 20, 22, .92), rgba(22, 22, 26, .84));
-    box-shadow: 0 18px 44px rgba(0, 0, 0, .28), inset 0 0 0 1px rgba(255, 255, 255, .04);
+    background: rgba(10, 17, 19, .24);
+    backdrop-filter: blur(8px) saturate(1.18);
+    -webkit-backdrop-filter: blur(8px) saturate(1.18);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, .28), inset 0 0 0 1px rgba(255, 255, 255, .08);
     overflow: hidden;
 
     &::before {
@@ -165,10 +167,31 @@ const handleRemove = (item: ProjectRenderItemModel) => {
         position: absolute;
         inset: 0;
         pointer-events: none;
-        opacity: .42;
+        opacity: .58;
         background:
-            linear-gradient(90deg, transparent 0 26%, color-mix(in srgb, var(--seal-primary) 36%, transparent) 26% 27%, transparent 27%),
-            linear-gradient(0deg, transparent 0 72%, color-mix(in srgb, var(--seal-secondary) 30%, transparent) 72% 73%, transparent 73%);
+            radial-gradient(circle at var(--card-glow-x, 80%) var(--card-glow-y, 18%), var(--card-color-a, rgba(97, 191, 173, .5)), transparent 48%),
+            radial-gradient(circle at calc(100% - var(--card-glow-x, 80%)) calc(100% - var(--card-glow-y, 18%)), var(--card-color-c, rgba(23, 142, 150, .28)), transparent 56%),
+            linear-gradient(var(--card-angle, 135deg), transparent 0 12%, var(--card-color-a, rgba(97, 191, 173, .38)) 34%, var(--card-color-b, rgba(203, 160, 170, .28)) 68%, transparent 100%);
+        mask-image:
+            radial-gradient(circle at var(--card-glow-x, 82%) var(--card-glow-y, 12%), black 0 34px, rgba(0, 0, 0, .86) 64px, transparent 116px),
+            linear-gradient(135deg, transparent 0 18%, rgba(0, 0, 0, .94) 40%, rgba(0, 0, 0, .64) 62%, transparent 84%);
+        mask-composite: add;
+        mix-blend-mode: soft-light;
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        width: 92px;
+        height: 92px;
+        right: -34px;
+        top: -36px;
+        pointer-events: none;
+        border-radius: 50%;
+        border: 1px solid color-mix(in srgb, var(--seal-primary) 34%, transparent);
+        background:
+            conic-gradient(from 0deg, transparent 0 16%, color-mix(in srgb, var(--seal-primary) 40%, transparent) 18%, transparent 20% 48%, color-mix(in srgb, var(--seal-secondary) 42%, transparent) 50%, transparent 52% 100%);
+        opacity: .16;
     }
 
     &:hover {
@@ -186,10 +209,10 @@ const handleRemove = (item: ProjectRenderItemModel) => {
 .ask-project-manage-card__box {
     position: relative;
     height: 100%;
-    padding: 10px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 5px;
 }
 
 .ask-project-manage-card__halo {
@@ -212,12 +235,12 @@ const handleRemove = (item: ProjectRenderItemModel) => {
 }
 
 .ask-project-manage-card__top {
-    gap: 8px;
+    gap: 6px;
 }
 
 .ask-project-manage-card__seal {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     flex: 0 0 auto;
     position: relative;
     display: grid;
@@ -233,13 +256,13 @@ const handleRemove = (item: ProjectRenderItemModel) => {
     span {
         position: relative;
         z-index: 1;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 800;
     }
 
     i {
         position: absolute;
-        inset: 7px;
+        inset: 6px;
         border: 1px solid color-mix(in srgb, var(--seal-secondary) 70%, transparent);
         transform: rotate(45deg);
     }
@@ -259,47 +282,57 @@ const handleRemove = (item: ProjectRenderItemModel) => {
 
     span {
         color: rgba(225, 255, 249, .48);
-        font-size: 9px;
+        font-size: 8px;
         letter-spacing: .04em;
     }
 
     strong {
         margin-top: 1px;
         color: color-mix(in srgb, var(--seal-primary) 78%, white);
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 650;
     }
 }
 
 .ask-project-manage-card__more {
     color: rgba(239, 255, 252, .72);
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    font-size: 12px;
 }
 
 .ask-project-manage-card__main {
     position: relative;
     z-index: 1;
     min-width: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 58px;
 
     h2 {
         margin: 0;
         color: #f4ffff;
-        font-size: 14px;
-        line-height: 1.25;
+        font-size: 13px;
+        line-height: 1.18;
         font-weight: 680;
         letter-spacing: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
+        min-height: 46px;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
         -webkit-box-orient: vertical;
     }
 
     p {
-        margin: 5px 0 0;
-        color: rgba(225, 255, 249, .52);
-        font-size: 10px;
-        line-height: 1.3;
+        margin: 3px 0 0;
+        color: rgba(225, 255, 249, .46);
+        font-size: 8px;
+        line-height: 1.15;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -314,12 +347,12 @@ const handleRemove = (item: ProjectRenderItemModel) => {
     span {
         min-width: 0;
         max-width: 60%;
-        padding: 3px 6px;
+        padding: 2px 5px;
         border: 1px solid rgba(255, 255, 255, .08);
         border-radius: 999px;
         color: rgba(235, 255, 250, .68);
         background: rgba(255, 255, 255, .04);
-        font-size: 10px;
+        font-size: 9px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;

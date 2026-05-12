@@ -3,9 +3,36 @@
   line-height: 1.5;
   font-weight: 400;
 
+  --apm-riviera: #FF8B8B;
+  --apm-swan-dive: #F9F7E8;
+  --apm-radio-silence: #61BFAD;
+  --apm-faded-letter: #D3E8E1;
+  --apm-mamas-new-bag: #CBA0AA;
+  --apm-late-homework: #178E96;
+  --apm-spring-awakening: #20AD65;
+  --apm-our-little-secret: #E75153;
+  --apm-dinner-party: #4F3A4B;
+
+  --apm-accent-coral: var(--apm-riviera);
+  --apm-accent-cream: var(--apm-swan-dive);
+  --apm-accent-mint: var(--apm-radio-silence);
+  --apm-accent-fog: var(--apm-faded-letter);
+  --apm-accent-mauve: var(--apm-mamas-new-bag);
+  --apm-accent-teal: var(--apm-late-homework);
+  --apm-accent-green: var(--apm-spring-awakening);
+  --apm-accent-red: var(--apm-our-little-secret);
+  --apm-accent-plum: var(--apm-dinner-party);
+
+  --apm-bg-deep: #070b0c;
+  --apm-bg-panel: color-mix(in srgb, var(--apm-dinner-party) 24%, #071011);
+  --apm-text-main: var(--apm-swan-dive);
+  --apm-text-muted: color-mix(in srgb, var(--apm-faded-letter) 64%, transparent);
+  --apm-border-subtle: color-mix(in srgb, var(--apm-radio-silence) 20%, transparent);
+  --apm-glow-soft: color-mix(in srgb, var(--apm-radio-silence) 22%, transparent);
+
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--apm-text-main);
+  background-color: var(--apm-bg-deep);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

@@ -29,7 +29,7 @@ withDefaults(defineProps<{
     overflow: hidden;
 
     :deep(.v-tabs) {
-        border: 1px solid rgba(138, 255, 237, .14);
+        border: 1px solid var(--apm-border-subtle);
         border-radius: 14px;
         background: rgba(7, 13, 15, .46);
     }
@@ -37,14 +37,14 @@ withDefaults(defineProps<{
     :deep(.v-tab) {
         min-width: auto;
         padding: 0 14px;
-        color: rgba(237, 255, 252, .68);
+        color: var(--apm-text-muted);
         letter-spacing: 0;
         text-transform: none;
     }
 
     :deep(.v-tab--selected) {
-        color: #efffff;
-        background: linear-gradient(90deg, rgba(0, 229, 255, .12), rgba(219, 80, 255, .1));
+        color: var(--apm-text-main);
+        background: linear-gradient(90deg, color-mix(in srgb, var(--apm-radio-silence) 18%, transparent), color-mix(in srgb, var(--apm-mamas-new-bag) 14%, transparent));
     }
 }
 </style>
