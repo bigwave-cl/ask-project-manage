@@ -72,13 +72,16 @@
             <ProjectTab v-model="groupActiveType" :list="groupList" />
 
             <div class="apm-list">
-            <EmptyText v-if="groupList.length === 0">
-                <template #text>
-                    <div>当前还没有分组数据，可以先添加分组，也可以直接从顶部导入项目</div>
-                </template>
-                <v-btn size="60" v-tooltip:top="toolBarRule.addGroup.tip" :icon="toolBarRule.addGroup.icon"
-                    @click="handleToolbarClick('addGroup')"></v-btn>
-            </EmptyText>
+                <div class="apm-gradient-preview" aria-hidden="true">
+                    <span>200 x 200</span>
+                </div>
+                <EmptyText v-if="groupList.length === 0">
+                    <template #text>
+                        <div>当前还没有分组数据，可以先添加分组，也可以直接从顶部导入项目</div>
+                    </template>
+                    <v-btn size="60" v-tooltip:top="toolBarRule.addGroup.tip" :icon="toolBarRule.addGroup.icon"
+                        @click="handleToolbarClick('addGroup')"></v-btn>
+                </EmptyText>
                 <EmptyText v-if="groupActiveType && list.length === 0" text="当前没有匹配的项目符牌，试试换个关键词或导入一个项目"></EmptyText>
                 <ProjectList
                     v-show="list.length > 0"
@@ -499,8 +502,42 @@ const {
         width: 100%;
         flex: 1;
         min-width: 300px;
+        position: relative;
         overflow-y: auto;
         padding-bottom: 28px;
+    }
+
+    .apm-gradient-preview {
+        position: fixed;
+        right: 24px;
+        bottom: 28px;
+        z-index: 3;
+        width: 200px;
+        height: 200px;
+        pointer-events: none;
+        border: 1px solid color-mix(in srgb, var(--apm-accent-mint) 44%, transparent);
+        border-radius: 8px;
+        background:
+            radial-gradient(circle at 94% 94%, var(--apm-accent-coral) 0%, transparent 34%),
+            radial-gradient(circle at 15% 12%, var(--apm-accent-coral) 0%, transparent 38%),
+            radial-gradient(circle at 77% 27%, var(--apm-accent-mauve) 0%, transparent 58%),
+            radial-gradient(circle at 27% 76%, var(--apm-accent-green) 0%, var(--apm-accent-teal) 48%, transparent 100%),
+            radial-gradient(circle at 48% 48%, var(--apm-accent-mint) 0%, var(--apm-accent-teal) 42%, transparent 72%),
+            linear-gradient(135deg, var(--apm-accent-plum) 0%, var(--apm-accent-teal) 52%, var(--apm-accent-plum) 100%);
+        box-shadow: 0 18px 52px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .18);
+        opacity: .94;
+
+        span {
+            position: absolute;
+            left: 10px;
+            top: 8px;
+            color: var(--apm-accent-plum);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            text-shadow: 0 1px 8px rgba(249, 247, 232, .48);
+        }
     }
 }
 

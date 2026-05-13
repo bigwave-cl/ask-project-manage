@@ -156,9 +156,15 @@ const handleRemove = (item: ProjectRenderItemModel) => {
     position: relative;
     border: 1px solid color-mix(in srgb, var(--seal-primary) 32%, transparent);
     border-radius: 18px;
-    background: rgba(10, 17, 19, .24);
-    backdrop-filter: blur(8px) saturate(1.18);
-    -webkit-backdrop-filter: blur(8px) saturate(1.18);
+    background:
+        radial-gradient(circle at 0 0, var(--card-color-tl, rgba(97, 191, 173, .26)), transparent 62%),
+        radial-gradient(circle at 100% 0, var(--card-color-tr, rgba(23, 142, 150, .26)), transparent 62%),
+        radial-gradient(circle at 100% 100%, var(--card-color-br, rgba(203, 160, 170, .26)), transparent 66%),
+        radial-gradient(circle at 0 100%, var(--card-color-bl, rgba(79, 58, 75, .26)), transparent 66%),
+        linear-gradient(var(--card-angle, 135deg), var(--card-color-tr, rgba(23, 142, 150, .26)) 0%, var(--card-color-tl, rgba(97, 191, 173, .26)) 34%, var(--card-color-br, rgba(203, 160, 170, .26)) 68%, var(--card-color-bl, rgba(79, 58, 75, .26)) 100%),
+        rgba(10, 17, 19, .24);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     box-shadow: 0 18px 44px rgba(0, 0, 0, .28), inset 0 0 0 1px rgba(255, 255, 255, .08);
     overflow: hidden;
 
@@ -167,14 +173,16 @@ const handleRemove = (item: ProjectRenderItemModel) => {
         position: absolute;
         inset: 0;
         pointer-events: none;
-        opacity: .58;
+        opacity: .34;
         background:
-            radial-gradient(circle at var(--card-glow-x, 80%) var(--card-glow-y, 18%), var(--card-color-a, rgba(97, 191, 173, .5)), transparent 48%),
-            radial-gradient(circle at calc(100% - var(--card-glow-x, 80%)) calc(100% - var(--card-glow-y, 18%)), var(--card-color-c, rgba(23, 142, 150, .28)), transparent 56%),
-            linear-gradient(var(--card-angle, 135deg), transparent 0 12%, var(--card-color-a, rgba(97, 191, 173, .38)) 34%, var(--card-color-b, rgba(203, 160, 170, .28)) 68%, transparent 100%);
+            radial-gradient(circle at 0 0, var(--card-color-tl, rgba(97, 191, 173, .28)), transparent 58%),
+            radial-gradient(circle at 100% 0, var(--card-color-tr, rgba(23, 142, 150, .26)), transparent 58%),
+            radial-gradient(circle at 100% 100%, var(--card-color-br, rgba(203, 160, 170, .22)), transparent 62%),
+            radial-gradient(circle at 0 100%, var(--card-color-bl, rgba(79, 58, 75, .28)), transparent 62%),
+            linear-gradient(var(--card-angle, 135deg), var(--card-color-tr, rgba(23, 142, 150, .2)) 0%, var(--card-color-tl, rgba(97, 191, 173, .18)) 32%, var(--card-color-br, rgba(203, 160, 170, .16)) 68%, var(--card-color-bl, rgba(79, 58, 75, .2)) 100%);
         mask-image:
-            radial-gradient(circle at var(--card-glow-x, 82%) var(--card-glow-y, 12%), black 0 34px, rgba(0, 0, 0, .86) 64px, transparent 116px),
-            linear-gradient(135deg, transparent 0 18%, rgba(0, 0, 0, .94) 40%, rgba(0, 0, 0, .64) 62%, transparent 84%);
+            radial-gradient(circle at 82% 12%, black 0 30px, rgba(0, 0, 0, .78) 58px, transparent 104px),
+            linear-gradient(135deg, transparent 0 12%, rgba(0, 0, 0, .9) 34%, rgba(0, 0, 0, .72) 64%, transparent 90%);
         mask-composite: add;
         mix-blend-mode: soft-light;
     }
