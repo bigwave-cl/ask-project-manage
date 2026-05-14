@@ -35,13 +35,13 @@ useBackground(canvasRef);
     top: 52%;
     border-radius: 50%;
     background:
-        radial-gradient(circle at 22% 24%, color-mix(in srgb, var(--apm-radio-silence) 58%, transparent), transparent 22%),
-        radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--apm-mamas-new-bag) 52%, transparent), transparent 24%),
-        radial-gradient(circle at 66% 70%, color-mix(in srgb, var(--apm-riviera) 38%, transparent), transparent 25%),
-        radial-gradient(circle at 30% 76%, color-mix(in srgb, var(--apm-late-homework) 45%, transparent), transparent 28%),
-        radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--apm-faded-letter) 22%, transparent), transparent 46%);
-    filter: blur(25px) saturate(1.12);
-    opacity: .18;
+        radial-gradient(circle at 20% 18%, color-mix(in srgb, var(--apm-mamas-new-bag) 48%, transparent), transparent 20%),
+        radial-gradient(circle at 76% 26%, color-mix(in srgb, var(--apm-radio-silence) 52%, transparent), transparent 22%),
+        radial-gradient(circle at 66% 72%, color-mix(in srgb, var(--apm-riviera) 28%, transparent), transparent 24%),
+        radial-gradient(circle at 32% 78%, color-mix(in srgb, var(--apm-late-homework) 34%, transparent), transparent 28%),
+        radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--apm-faded-letter) 16%, transparent), transparent 48%);
+    filter: blur(36px) saturate(1.24);
+    opacity: .22;
     mix-blend-mode: screen;
     will-change: transform;
     transform: translate(-50%, -50%) rotate(0deg);
@@ -54,9 +54,8 @@ useBackground(canvasRef);
     z-index: 1;
     width: 100%;
     height: 100%;
-    opacity: .58;
-    filter: blur(.18px);
-    mix-blend-mode: screen;
+    opacity: 1;
+    mix-blend-mode: normal;
 }
 
 @keyframes background-aura-field {
