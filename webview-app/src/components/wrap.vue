@@ -49,25 +49,6 @@
                 </div>
             </header>
 
-            <section class="apm-metrics">
-                <div class="apm-metric">
-                    <span>项目总数</span>
-                    <strong>{{ totalProjectCount }}</strong>
-                </div>
-                <div class="apm-metric">
-                    <span>工作区</span>
-                    <strong>{{ workspaceCount }}</strong>
-                </div>
-                <div class="apm-metric">
-                    <span>文件夹</span>
-                    <strong>{{ folderCount }}</strong>
-                </div>
-                <div class="apm-metric apm-metric--active">
-                    <span>当前域</span>
-                    <strong>{{ currentGroupLabel }}</strong>
-                </div>
-            </section>
-
             <ProjectTab v-model="groupActiveType" :list="groupList" />
 
             <div class="apm-list">
@@ -78,7 +59,10 @@
                     <v-btn size="60" v-tooltip:top="toolBarRule.addGroup.tip" :icon="toolBarRule.addGroup.icon"
                         @click="handleToolbarClick('addGroup')"></v-btn>
                 </EmptyText>
-                <EmptyText v-if="groupActiveType && list.length === 0" text="当前没有匹配的项目符牌，试试换个关键词或导入一个项目"></EmptyText>
+                <EmptyText
+                    v-if="groupList.length > 0 && groupActiveType && list.length === 0"
+                    text="当前没有匹配的项目符牌，试试换个关键词或导入一个项目"
+                ></EmptyText>
                 <ProjectList
                     v-show="list.length > 0"
                     :list="list"
@@ -88,6 +72,14 @@
                     @item-remove="removeProject"
                 ></ProjectList>
             </div>
+
+            <ProjectHudDashboard
+                :current-group-label="currentGroupLabel"
+                :total-project-count="totalProjectCount"
+                :folder-count="folderCount"
+                :workspace-count="workspaceCount"
+                :group-count="groupList.length"
+            />
         </div>
     </div>
     <ProjectSetting v-model="isSettingState" :list="sourceList" @save-setting="onSaveSetting" />
@@ -101,6 +93,7 @@ import ProjectSetting from "./setting.vue"
 import InfoDialog from "./infoDialog.vue"
 import EmptyText from "./empty.vue"
 import ProjectManageBackground from "./background.vue";
+import ProjectHudDashboard from "./projectHudDashboard.vue";
 import { useWrap } from "./useWrap"
 defineOptions({
     name: "ProjectManageWrap"
@@ -126,6 +119,7 @@ const {
     onInfoDialogSure,
     toolBarRule
 } = useWrap();
+
 </script>
 <style lang="scss" scoped>
 .ask-project-manage-wrap {
@@ -221,49 +215,13 @@ const {
         }
     }
 
-    .apm-metrics {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(120px, 1fr));
-        gap: 10px;
-    }
-
-    .apm-metric {
-        min-height: 58px;
-        padding: 10px 14px;
-        border: 1px solid var(--apm-border-subtle);
-        border-radius: 14px;
-        background: rgba(10, 18, 20, .54);
-
-        span {
-            display: block;
-            color: var(--apm-text-muted);
-            font-size: 12px;
-        }
-
-        strong {
-            display: block;
-            margin-top: 4px;
-            color: var(--apm-text-main);
-            font-size: 18px;
-            font-weight: 650;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-    }
-
-    .apm-metric--active {
-        border-color: color-mix(in srgb, var(--apm-mamas-new-bag) 34%, transparent);
-        box-shadow: inset 0 0 24px color-mix(in srgb, var(--apm-mamas-new-bag) 12%, transparent);
-    }
-
     .apm-list {
         width: 100%;
         flex: 1;
         min-width: 300px;
         position: relative;
         overflow-y: auto;
-        padding-bottom: 28px;
+        padding-bottom: 420px;
     }
 }
 
@@ -283,9 +241,15 @@ const {
             flex-wrap: wrap;
         }
 
-        .apm-metrics {
-            grid-template-columns: repeat(2, minmax(120px, 1fr));
+        .apm-list {
+            padding-bottom: 168px;
         }
+
     }
 }
+
+
+
+
+
 </style>
