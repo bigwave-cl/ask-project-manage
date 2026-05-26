@@ -57,14 +57,29 @@
                 prepend-icon="mdi-book-plus-multiple-outline"
                 @click="emit('toolbar-click', 'chooseWorkspace')"
             >工作区</v-btn>
-            <v-menu location="bottom end">
+            <v-menu location="bottom end" :offset="8">
                 <template v-slot:activator="{ props }">
                     <v-btn v-bind="props" icon="mdi-dots-grid" variant="text"></v-btn>
                 </template>
                 <v-list density="compact" class="apm-menu">
-                    <v-list-item prepend-icon="mdi-view-grid-plus-outline" title="添加分组" @click="emit('toolbar-click', 'addGroup')"></v-list-item>
-                    <v-list-item prepend-icon="mdi-cog-outline" title="批量管理" @click="emit('toolbar-click', 'setting')"></v-list-item>
-                    <v-list-item prepend-icon="mdi-trash-can-outline" title="删除当前分组" @click="emit('toolbar-click', 'removeGroup')"></v-list-item>
+                    <v-list-item
+                        class="apm-menu__item apm-menu__item--mint"
+                        prepend-icon="mdi-view-grid-plus-outline"
+                        title="添加分组"
+                        @click="emit('toolbar-click', 'addGroup')"
+                    ></v-list-item>
+                    <v-list-item
+                        class="apm-menu__item apm-menu__item--mauve"
+                        prepend-icon="mdi-cog-outline"
+                        title="批量管理"
+                        @click="emit('toolbar-click', 'setting')"
+                    ></v-list-item>
+                    <v-list-item
+                        class="apm-menu__item apm-menu__item--coral"
+                        prepend-icon="mdi-trash-can-outline"
+                        title="删除当前分组"
+                        @click="emit('toolbar-click', 'removeGroup')"
+                    ></v-list-item>
                 </v-list>
             </v-menu>
         </div>
@@ -86,7 +101,7 @@ const emit = defineEmits<{
 }>();
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .apm-command {
     position: relative;
     display: grid;
@@ -290,7 +305,7 @@ const emit = defineEmits<{
     position: relative;
     z-index: 1;
 
-    :deep(.v-field) {
+    .v-field {
         border: 1px solid color-mix(in srgb, var(--apm-radio-silence) 30%, transparent);
         border-radius: 16px 8px 16px 8px;
         background:
@@ -302,7 +317,7 @@ const emit = defineEmits<{
             inset 0 0 24px color-mix(in srgb, var(--apm-radio-silence) 7%, transparent);
     }
 
-    :deep(.v-field::before) {
+    .v-field::before {
         content: "";
         position: absolute;
         left: 18px;
@@ -347,8 +362,131 @@ const emit = defineEmits<{
 }
 
 .apm-menu {
-    border: 1px solid var(--apm-border-subtle);
-    background: rgba(18, 23, 25, .96);
+    position: relative;
+    min-width: 188px;
+    overflow: hidden;
+    padding: 8px;
+    border: 1px solid color-mix(in srgb, var(--apm-radio-silence) 34%, transparent);
+    border-radius: 16px !important;
+    background:
+        linear-gradient(180deg, rgba(12, 28, 30, .94), rgba(5, 8, 13, .96)),
+        repeating-linear-gradient(90deg, rgba(97, 191, 173, .055) 0 1px, transparent 1px 18px),
+        repeating-linear-gradient(180deg, rgba(249, 247, 232, .04) 0 1px, transparent 1px 16px);
+    box-shadow:
+        0 18px 42px rgba(0, 0, 0, .48),
+        0 0 26px color-mix(in srgb, var(--apm-radio-silence) 18%, transparent),
+        0 0 34px color-mix(in srgb, var(--apm-riviera) 8%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, .1);
+    color: var(--apm-text-main);
+
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+    }
+
+    &::before {
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 16% 0%, color-mix(in srgb, var(--apm-radio-silence) 24%, transparent), transparent 40%),
+            radial-gradient(ellipse at 92% 100%, color-mix(in srgb, var(--apm-riviera) 16%, transparent), transparent 44%),
+            linear-gradient(110deg, transparent 0 38%, rgba(249, 247, 232, .07) 46%, transparent 56% 100%);
+        mix-blend-mode: screen;
+        opacity: .78;
+    }
+
+    &::after {
+        left: 12px;
+        right: 12px;
+        top: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--apm-radio-silence), var(--apm-riviera), transparent);
+        box-shadow: 0 0 14px color-mix(in srgb, var(--apm-radio-silence) 38%, transparent);
+        opacity: .72;
+    }
+
+    .v-list-item {
+        position: relative;
+        z-index: 1;
+        min-height: 42px;
+        margin: 2px 0;
+        border: 1px solid transparent;
+        border-radius: 7px !important;
+        color: color-mix(in srgb, var(--apm-swan-dive) 88%, transparent);
+        transition:
+            border-color 160ms ease,
+            background 160ms ease,
+            color 160ms ease,
+            transform 160ms ease,
+            box-shadow 160ms ease;
+    }
+
+    .v-list-item__prepend {
+        margin-inline-end: 14px;
+    }
+
+    .v-list-item-title {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0;
+    }
+
+    .v-icon {
+        opacity: .94;
+        filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    .v-list-item__overlay {
+        opacity: 0;
+    }
+
+    .v-list-item::before {
+        content: "";
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, color-mix(in srgb, currentColor 28%, transparent), transparent);
+        opacity: .34;
+    }
+
+    .v-list-item:hover {
+        color: var(--apm-swan-dive);
+        border-color: color-mix(in srgb, currentColor 28%, transparent);
+        background:
+            linear-gradient(90deg, color-mix(in srgb, currentColor 14%, transparent), transparent 76%),
+            rgba(249, 247, 232, .035);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, .08),
+            0 0 18px color-mix(in srgb, currentColor 12%, transparent);
+        transform: translateX(2px);
+    }
+
+    .apm-menu__item--mint {
+        color: var(--apm-radio-silence);
+    }
+
+    .apm-menu__item--mauve {
+        color: var(--apm-mamas-new-bag);
+    }
+
+    .apm-menu__item--coral {
+        color: var(--apm-riviera);
+    }
+
+    .apm-menu__item--mint .v-list-item-title,
+    .apm-menu__item--mauve .v-list-item-title,
+    .apm-menu__item--coral .v-list-item-title {
+        color: color-mix(in srgb, var(--apm-swan-dive) 88%, transparent);
+    }
+
+    .apm-menu__item--mint:hover .v-list-item-title,
+    .apm-menu__item--mauve:hover .v-list-item-title,
+    .apm-menu__item--coral:hover .v-list-item-title {
+        color: var(--apm-swan-dive);
+    }
 }
 
 @keyframes apm-command-line-breathe {
