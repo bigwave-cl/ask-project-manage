@@ -7,7 +7,7 @@
                 @toolbar-click="handleToolbarClick"
             />
 
-            <ProjectTab v-model="groupActiveType" :list="groupList" />
+            <ProjectTab v-if="sourceList.length > 1" v-model="groupActiveType" :list="groupList" />
 
             <div class="apm-list" :class="{ 'apm-list--empty': list.length === 0 }">
                 <EmptyText v-if="groupList.length === 0">

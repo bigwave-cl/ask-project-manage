@@ -16,7 +16,7 @@
                     <span>{{ item.type === "workspace" ? "WORKSPACE" : "FOLDER" }}</span>
                     <strong>{{ runeName }}</strong>
                 </div>
-                <v-menu location="bottom end">
+                <v-menu location="bottom end" :offset="8">
                     <template v-slot:activator="{ props }">
 	                        <v-btn
 	                            v-bind="props"
@@ -28,10 +28,10 @@
 	                        ></v-btn>
                     </template>
                     <v-list density="compact" class="ask-project-manage-card__menu">
-                        <v-list-item prepend-icon="mdi-open-in-new" title="打开项目" @click="handleClick(item)"></v-list-item>
-                        <v-list-item prepend-icon="mdi-pencil-outline" title="编辑符名" @click="handleEdit(item)"></v-list-item>
-                        <v-list-item prepend-icon="mdi-content-copy" title="复制路径" @click="handleCopy(item)"></v-list-item>
-                        <v-list-item prepend-icon="mdi-trash-can-outline" title="删除项目" @click="handleRemove(item)"></v-list-item>
+                        <v-list-item class="ask-project-manage-card__menu-item ask-project-manage-card__menu-item--mint" prepend-icon="mdi-open-in-new" title="打开项目" @click="handleClick(item)"></v-list-item>
+                        <v-list-item class="ask-project-manage-card__menu-item ask-project-manage-card__menu-item--mauve" prepend-icon="mdi-pencil-outline" title="编辑符名" @click="handleEdit(item)"></v-list-item>
+                        <v-list-item class="ask-project-manage-card__menu-item ask-project-manage-card__menu-item--fog" prepend-icon="mdi-content-copy" title="复制路径" @click="handleCopy(item)"></v-list-item>
+                        <v-list-item class="ask-project-manage-card__menu-item ask-project-manage-card__menu-item--danger" prepend-icon="mdi-trash-can-outline" title="删除项目" @click="handleRemove(item)"></v-list-item>
                     </v-list>
                 </v-menu>
             </div>
@@ -151,7 +151,7 @@ const handleRemove = (item: ProjectRenderItemModel) => {
     emits("item-remove", item);
 };
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .ask-project-manage-card {
     position: relative;
     border: 1px solid color-mix(in srgb, var(--seal-primary) 32%, transparent);
@@ -375,7 +375,127 @@ const handleRemove = (item: ProjectRenderItemModel) => {
 }
 
 .ask-project-manage-card__menu {
-    border: 1px solid rgba(145, 255, 237, .16);
-    background: rgba(18, 23, 25, .96);
+    position: relative;
+    min-width: 172px;
+    overflow: hidden;
+    padding: 8px;
+    border: 1px solid color-mix(in srgb, var(--apm-radio-silence) 34%, transparent);
+    border-radius: 16px !important;
+    background:
+        linear-gradient(180deg, rgba(12, 28, 30, .94), rgba(5, 8, 13, .96)),
+        repeating-linear-gradient(90deg, rgba(97, 191, 173, .055) 0 1px, transparent 1px 18px),
+        repeating-linear-gradient(180deg, rgba(249, 247, 232, .04) 0 1px, transparent 1px 16px);
+    box-shadow:
+        0 18px 42px rgba(0, 0, 0, .48),
+        0 0 26px color-mix(in srgb, var(--apm-radio-silence) 18%, transparent),
+        0 0 34px color-mix(in srgb, var(--apm-riviera) 8%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, .1);
+    color: var(--apm-text-main);
+
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+    }
+
+    &::before {
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 16% 0%, color-mix(in srgb, var(--apm-radio-silence) 24%, transparent), transparent 40%),
+            radial-gradient(ellipse at 92% 100%, color-mix(in srgb, var(--apm-riviera) 16%, transparent), transparent 44%),
+            linear-gradient(110deg, transparent 0 38%, rgba(249, 247, 232, .07) 46%, transparent 56% 100%);
+        mix-blend-mode: screen;
+        opacity: .78;
+    }
+
+    &::after {
+        left: 12px;
+        right: 12px;
+        top: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--apm-radio-silence), var(--apm-riviera), transparent);
+        box-shadow: 0 0 14px color-mix(in srgb, var(--apm-radio-silence) 38%, transparent);
+        opacity: .72;
+    }
+
+    .v-list-item {
+        position: relative;
+        z-index: 1;
+        min-height: 40px;
+        margin: 2px 0;
+        border: 1px solid transparent;
+        border-radius: 8px !important;
+        color: color-mix(in srgb, var(--apm-swan-dive) 88%, transparent);
+        transition:
+            border-color 160ms ease,
+            background 160ms ease,
+            color 160ms ease,
+            transform 160ms ease,
+            box-shadow 160ms ease;
+    }
+
+    .v-list-item__prepend {
+        margin-inline-end: 14px;
+    }
+
+    .v-list-item-title {
+        color: color-mix(in srgb, var(--apm-swan-dive) 88%, transparent);
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0;
+    }
+
+    .v-icon {
+        opacity: .94;
+        filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    .v-list-item__overlay {
+        opacity: 0;
+    }
+
+    .v-list-item::before {
+        content: "";
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, color-mix(in srgb, currentColor 28%, transparent), transparent);
+        opacity: .34;
+    }
+
+    .v-list-item:hover {
+        color: var(--apm-swan-dive);
+        border-color: color-mix(in srgb, currentColor 28%, transparent);
+        background:
+            linear-gradient(90deg, color-mix(in srgb, currentColor 14%, transparent), transparent 76%),
+            rgba(249, 247, 232, .035);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, .08),
+            0 0 18px color-mix(in srgb, currentColor 12%, transparent);
+        transform: translateX(2px);
+    }
+
+    .ask-project-manage-card__menu-item--mint {
+        color: var(--apm-radio-silence);
+    }
+
+    .ask-project-manage-card__menu-item--mauve {
+        color: var(--apm-mamas-new-bag);
+    }
+
+    .ask-project-manage-card__menu-item--fog {
+        color: var(--apm-faded-letter);
+    }
+
+    .ask-project-manage-card__menu-item--danger {
+        color: var(--apm-riviera);
+    }
+
+    .ask-project-manage-card__menu-item--danger:hover .v-list-item-title {
+        color: var(--apm-riviera);
+    }
 }
 </style>
