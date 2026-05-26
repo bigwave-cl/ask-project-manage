@@ -45,18 +45,41 @@
             ></v-text-field>
         </div>
         <div class="apm-command__actions">
-            <v-btn
-                variant="tonal"
-                color="cyan-lighten-2"
-                prepend-icon="mdi-folder-plus-outline"
-                @click="emit('toolbar-click', 'chooseFolder')"
-            >文件夹</v-btn>
-            <v-btn
-                variant="tonal"
-                color="deep-purple-lighten-2"
-                prepend-icon="mdi-book-plus-multiple-outline"
-                @click="emit('toolbar-click', 'chooseWorkspace')"
-            >工作区</v-btn>
+            <div class="apm-import-control">
+                <v-btn
+                    class="apm-import-control__primary"
+                    variant="tonal"
+                    color="deep-purple-lighten-2"
+                    prepend-icon="mdi-book-plus-multiple-outline"
+                    @click="emit('toolbar-click', 'chooseWorkspace')"
+                >导入工作区</v-btn>
+                <v-menu location="bottom end" :offset="8">
+                    <template v-slot:activator="{ props }">
+                        <v-btn
+                            v-bind="props"
+                            class="apm-import-control__toggle"
+                            icon="mdi-chevron-down"
+                            variant="tonal"
+                            color="deep-purple-lighten-2"
+                            aria-label="展开导入选项"
+                        ></v-btn>
+                    </template>
+                    <v-list density="compact" class="apm-menu apm-import-menu">
+                        <v-list-item
+                            class="apm-menu__item apm-menu__item--mauve"
+                            prepend-icon="mdi-book-plus-multiple-outline"
+                            title="导入工作区"
+                            @click="emit('toolbar-click', 'chooseWorkspace')"
+                        ></v-list-item>
+                        <v-list-item
+                            class="apm-menu__item apm-menu__item--mint"
+                            prepend-icon="mdi-folder-plus-outline"
+                            title="导入文件夹"
+                            @click="emit('toolbar-click', 'chooseFolder')"
+                        ></v-list-item>
+                    </v-list>
+                </v-menu>
+            </div>
             <v-menu location="bottom end" :offset="8">
                 <template v-slot:activator="{ props }">
                     <v-btn v-bind="props" icon="mdi-dots-grid" variant="text"></v-btn>
@@ -103,6 +126,7 @@ const emit = defineEmits<{
 
 <style lang="scss">
 .apm-command {
+    --apm-command-control-height: 40px;
     position: relative;
     display: grid;
     grid-template-columns: minmax(220px, 320px) minmax(260px, 1fr) auto;
@@ -305,6 +329,13 @@ const emit = defineEmits<{
     position: relative;
     z-index: 1;
 
+    .v-input,
+    .v-input__control,
+    .v-field {
+        min-height: var(--apm-command-control-height);
+        height: var(--apm-command-control-height);
+    }
+
     .v-field {
         border: 1px solid color-mix(in srgb, var(--apm-radio-silence) 30%, transparent);
         border-radius: 16px 8px 16px 8px;
@@ -336,9 +367,11 @@ const emit = defineEmits<{
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
+    min-height: var(--apm-command-control-height);
 
     .v-btn {
-        min-height: 36px;
+        height: var(--apm-command-control-height);
+        min-height: var(--apm-command-control-height);
         border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
         border-radius: 14px 7px 14px 7px;
         background:
@@ -359,6 +392,51 @@ const emit = defineEmits<{
                 inset 0 1px 0 rgba(255, 255, 255, .12);
         }
     }
+}
+
+.apm-import-control {
+    display: inline-flex;
+    align-items: center;
+    height: var(--apm-command-control-height);
+    min-height: var(--apm-command-control-height);
+    border-radius: 16px 8px 16px 8px;
+    box-shadow: 0 0 20px color-mix(in srgb, var(--apm-mamas-new-bag) 13%, transparent);
+
+    .v-btn {
+        margin: 0;
+        height: var(--apm-command-control-height);
+        min-height: var(--apm-command-control-height);
+
+        &:hover {
+            transform: none;
+        }
+    }
+
+    .apm-import-control__primary {
+        align-self: stretch;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right-color: color-mix(in srgb, var(--apm-mamas-new-bag) 18%, transparent);
+        color: var(--apm-mamas-new-bag);
+    }
+
+    .apm-import-control__toggle {
+        align-self: stretch;
+        width: 38px;
+        min-width: 38px;
+        padding-inline: 0;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        color: var(--apm-mamas-new-bag);
+    }
+
+    .apm-import-control__toggle .v-icon {
+        font-size: 18px;
+    }
+}
+
+.apm-import-menu {
+    min-width: 178px;
 }
 
 .apm-menu {

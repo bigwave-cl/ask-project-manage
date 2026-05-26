@@ -22,8 +22,29 @@
                 </EmptyText>
                 <EmptyText
                     v-if="groupList.length > 0 && groupActiveType && list.length === 0"
-                    text="当前没有匹配的项目符牌，试试换个关键词或导入一个项目"
-                ></EmptyText>
+                >
+                    <template #text>
+                        <div class="apm-empty-guide">
+                            <strong>当前分组还没有项目符牌</strong>
+                            <span>先导入一个文件夹或工作区，项目会自动收纳到当前分组。</span>
+                        </div>
+                    </template>
+                    <div class="apm-empty-actions">
+                        <v-btn
+                            v-tooltip:top="toolBarRule.chooseFolder.tip"
+                            :prepend-icon="toolBarRule.chooseFolder.icon"
+                            @click="handleToolbarClick('chooseFolder')"
+                        >导入文件夹</v-btn>
+                        <v-btn
+                            v-tooltip:top="toolBarRule.chooseWorkspace.tip"
+                            :prepend-icon="toolBarRule.chooseWorkspace.icon"
+                            @click="handleToolbarClick('chooseWorkspace')"
+                        >导入工作区</v-btn>
+                    </div>
+                    <div class="apm-empty-hint">
+                        <span>也可以使用顶部搜索清空关键词，查看当前分组的全部项目。</span>
+                    </div>
+                </EmptyText>
                 <ProjectList
                     v-show="list.length > 0"
                     :list="list"
@@ -149,6 +170,63 @@ const {
             padding-bottom: 280px;
         }
     }
+}
+
+.apm-empty-guide {
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+    max-width: min(560px, 86vw);
+
+    strong {
+        color: var(--apm-text-main);
+        font-size: 18px;
+        line-height: 1.35;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-shadow: 0 0 18px color-mix(in srgb, var(--apm-radio-silence) 22%, transparent);
+    }
+
+    span {
+        color: color-mix(in srgb, var(--apm-faded-letter) 78%, transparent);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+}
+
+.apm-empty-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+
+    :deep(.v-btn) {
+        min-width: 128px;
+        min-height: 38px;
+        border-radius: 16px;
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+
+    :deep(.v-btn:first-child) {
+        color: #73eaff;
+    }
+
+    :deep(.v-btn:last-child) {
+        color: var(--apm-mamas-new-bag);
+        border-color: color-mix(in srgb, var(--apm-mamas-new-bag) 40%, transparent);
+        box-shadow:
+            0 0 22px color-mix(in srgb, var(--apm-mamas-new-bag) 16%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, .08);
+    }
+}
+
+.apm-empty-hint {
+    margin-top: 14px;
+    color: color-mix(in srgb, var(--apm-faded-letter) 56%, transparent);
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: center;
 }
 
 @media (max-width: 860px) {
