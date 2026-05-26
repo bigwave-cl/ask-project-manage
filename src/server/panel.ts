@@ -3,13 +3,25 @@ import { getRenderContent, buildStaticDist } from "./renderPage";
 import { useMessage } from "./useMessage";
 import { updateStatusBar } from "./statusBar";
 import { CommandTypes, EventTypes, MessageParams } from "../types";
+import { debugLog } from "./debug";
 let panel: vscode.WebviewPanel | undefined;
 let panelVisible: boolean = false;
 export const createPanel = async (context: vscode.ExtensionContext) => {
+    debugLog("panel.createPanel", "createPanel called", {
+        hasPanel: !!panel,
+        panelVisible,
+    });
     if (panel) {
+        debugLog("panel.createPanel", "reuse existing panel via reveal", {
+            panelVisible: panel.visible,
+        });
         panel.reveal(); // 如果面板已经打开，聚焦到该面板
     } else {
         const { distPath, distUriFile, iconUriFile } = buildStaticDist(context);
+        debugLog("panel.createPanel", "creating new webview panel", {
+            distPath,
+            distUriFile: distUriFile.fsPath,
+        });
         panel = vscode.window.createWebviewPanel("vueApp", "Ask Project Manage", vscode.ViewColumn.One, {
             enableScripts: true, // 允许运行 JS
             retainContextWhenHidden: true, // 隐藏时保留上下文
@@ -31,13 +43,21 @@ export const createPanel = async (context: vscode.ExtensionContext) => {
             context,
         });
         panel.onDidChangeViewState(e => {
+            debugLog("panel.viewState", "panel view state changed", {
+                visible: e.webviewPanel.visible,
+                active: e.webviewPanel.active,
+            });
             updateStatusBar(e.webviewPanel.visible);
             panelVisible = e.webviewPanel.visible;
         });
         panelVisible = true;
+        debugLog("panel.createPanel", "new panel ready", {
+            panelVisible,
+        });
 
         // 监听 Webview 的关闭事件
         panel.onDidDispose(() => {
+            debugLog("panel.dispose", "panel disposed");
             panel = undefined; // 清理引用
             updateStatusBar(false);
             panelVisible = false;
@@ -58,6 +78,10 @@ const notifyWindowInfo = ()=> {
     });
 }
 export const destroyPanel = () => {
+    debugLog("panel.destroyPanel", "destroyPanel called", {
+        hasPanel: !!panel,
+        panelVisible,
+    });
     panel?.dispose();
     panel = undefined; // 清理引用
 };
@@ -70,6 +94,9 @@ export const getPanel = () => {
 
 // command目前只有useMessage带了command后缀的方法以及../types.ts定义的EventTypes
 export const postMessage = (currentPanel: vscode.WebviewPanel, msg: MessageParams<any>) => {
+    debugLog("panel.postMessage", "post message to webview", {
+        command: msg.command,
+    });
     return currentPanel.webview.postMessage({
         command: msg.command,
         data: msg.data,
@@ -79,7 +106,8 @@ export const postMessage = (currentPanel: vscode.WebviewPanel, msg: MessageParam
 };
 
 export const openPanel = () => {
+    debugLog("panel.openPanel", "execute open command");
     vscode.commands.executeCommand(CommandTypes.open).then(() => {
-        console.log("ask-project-manage.showPanel executed on activation");
+        debugLog("panel.openPanel", "open command resolved");
     });
 };
