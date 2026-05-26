@@ -1,13 +1,15 @@
 <template>
     <div class="ask-project-manage-wrap">
         <ProjectManageBackground />
-        <div class="apm-shell">
-            <ProjectCommandHeader
-                v-model:search-keyword="searchKeyword"
-                @toolbar-click="handleToolbarClick"
-            />
+        <div class="apm-shell" :class="{ 'apm-shell--with-tabs': sourceList.length > 1 }">
+            <div class="apm-shell__sticky">
+                <ProjectCommandHeader
+                    v-model:search-keyword="searchKeyword"
+                    @toolbar-click="handleToolbarClick"
+                />
 
-            <ProjectTab v-if="sourceList.length > 1" v-model="groupActiveType" :list="groupList" />
+                <ProjectTab v-if="sourceList.length > 1" v-model="groupActiveType" :list="groupList" />
+            </div>
 
             <div class="apm-list" :class="{ 'apm-list--empty': list.length === 0 }">
                 <EmptyText v-if="groupList.length === 0">
@@ -60,7 +62,7 @@
                 :total-project-count="totalProjectCount"
                 :folder-count="folderCount"
                 :workspace-count="workspaceCount"
-                :group-count="groupList.length"
+                :group-count="sourceList.length"
             />
         </div>
     </div>
@@ -129,22 +131,59 @@ const {
     }
 
     .apm-shell {
+        --apm-sticky-safe-space: 108px;
         position: relative;
         z-index: 1;
         height: 100%;
         display: flex;
         flex-direction: column;
         padding: 22px 24px 0;
+        gap: 0;
+        overflow: hidden;
+    }
+
+    .apm-shell--with-tabs {
+        --apm-sticky-safe-space: 150px;
+    }
+
+    .apm-shell__sticky {
+        position: absolute;
+        top: 22px;
+        left: 24px;
+        right: 24px;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
         gap: 16px;
+        padding-bottom: 16px;
+        background:
+            linear-gradient(180deg, rgba(6, 11, 19, .96) 0%, rgba(6, 11, 19, .82) 72%, transparent 100%);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+
+        &::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 1px;
+            pointer-events: none;
+            background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--apm-radio-silence) 28%, transparent), color-mix(in srgb, var(--apm-riviera) 18%, transparent), transparent);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, .26);
+            opacity: .7;
+        }
     }
 
     .apm-list {
         width: 100%;
         flex: 1;
+        min-height: 0;
         min-width: 300px;
         position: relative;
         overflow-y: auto;
-        padding-bottom: 420px;
+        margin-inline: -24px;
+        padding: var(--apm-sticky-safe-space) 24px 420px;
         scrollbar-width: thin;
         scrollbar-color: color-mix(in srgb, var(--apm-radio-silence) 26%, transparent) transparent;
 
@@ -232,11 +271,11 @@ const {
 @media (max-width: 860px) {
     .ask-project-manage-wrap {
         .apm-list {
-            padding-bottom: 168px;
+            padding: var(--apm-sticky-safe-space) 24px 168px;
         }
 
         .apm-list--empty {
-            padding-bottom: 168px;
+            padding: var(--apm-sticky-safe-space) 24px 168px;
         }
 
     }
