@@ -674,16 +674,16 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
 .apm-cockpit__adhesion {
     position: absolute;
     left: 50%;
-    bottom: -22px;
+    bottom: -8px;
     z-index: 1;
     width: min(940px, 96%);
-    height: 118px;
+    height: 96px;
     pointer-events: none;
     transform: translateX(-50%);
-    opacity: .82;
+    opacity: .58;
     mix-blend-mode: screen;
-    mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 74%, transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 74%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 68%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 68%, transparent 100%);
 
     &::before,
     &::after {
@@ -697,17 +697,17 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
     &::before {
         bottom: 0;
         width: 86%;
-        height: 46px;
+        height: 34px;
         border-radius: 50%;
         background:
             radial-gradient(ellipse at 50% 20%, color-mix(in srgb, var(--apm-radio-silence) 22%, transparent), transparent 62%),
             radial-gradient(ellipse at 38% 60%, color-mix(in srgb, var(--apm-riviera) 12%, transparent), transparent 58%),
             linear-gradient(180deg, rgba(2, 8, 10, .08), rgba(0, 0, 0, .72));
-        filter: blur(11px);
+        filter: blur(13px);
     }
 
     &::after {
-        bottom: 16px;
+        bottom: 20px;
         width: 64%;
         height: 1px;
         background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--apm-radio-silence) 50%, transparent), color-mix(in srgb, var(--apm-riviera) 28%, transparent), transparent);
@@ -727,7 +727,7 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
 
     > span {
         position: absolute;
-        bottom: 18px;
+        bottom: 26px;
         width: 6px;
         height: 6px;
         border-radius: 50%;
@@ -764,11 +764,11 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
 .apm-adhesion__tendrils {
     fill: none;
     stroke: url(#apmAdhesionStroke);
-    stroke-width: 3.4;
+    stroke-width: 2.4;
     stroke-linecap: round;
     stroke-dasharray: 84 26;
     filter: drop-shadow(0 0 8px color-mix(in srgb, var(--apm-radio-silence) 22%, transparent));
-    animation: apm-tendril-drift 6.8s ease-in-out infinite;
+    animation: apm-tendril-drift 7.6s ease-in-out infinite;
 }
 
 .apm-adhesion__nodes {
