@@ -436,7 +436,12 @@ const handleRemove = (item: ProjectRenderItemModel) => {
     }
 
     .v-list-item__prepend {
-        margin-inline-end: 14px;
+        margin-inline-end: 4px;
+    }
+
+    .v-list-item__prepend > .v-icon ~ .v-list-item__spacer,
+    .v-list-item__spacer {
+        width: 4px !important;
     }
 
     .v-list-item-title {

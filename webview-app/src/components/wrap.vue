@@ -5,6 +5,7 @@
             <div class="apm-shell__sticky">
                 <ProjectCommandHeader
                     v-model:search-keyword="searchKeyword"
+                    :remove-group-title="groupActiveType === 'all' ? '删除全部分组' : '删除当前分组'"
                     @toolbar-click="handleToolbarClick"
                 />
 
@@ -12,18 +13,25 @@
             </div>
 
             <div class="apm-list" :class="{ 'apm-list--empty': list.length === 0 }">
-                <EmptyText v-if="groupList.length === 0">
+                <EmptyText v-if="sourceList.length === 0">
                     <template #text>
                         <div>当前还没有分组数据，可以先添加分组，也可以直接从顶部导入项目</div>
                     </template>
-                    <v-btn
-                        v-tooltip:top="toolBarRule.addGroup.tip"
-                        :prepend-icon="toolBarRule.addGroup.icon"
-                        @click="handleToolbarClick('addGroup')"
-                    >添加分组</v-btn>
+                    <div class="apm-empty-actions">
+                        <v-btn
+                            v-tooltip:top="toolBarRule.addGroup.tip"
+                            :prepend-icon="toolBarRule.addGroup.icon"
+                            @click="handleToolbarClick('addGroup')"
+                        >添加分组</v-btn>
+                        <v-btn
+                            v-tooltip:top="toolBarRule.importConfig.tip"
+                            :prepend-icon="toolBarRule.importConfig.icon"
+                            @click="handleToolbarClick('importConfig')"
+                        >导入配置</v-btn>
+                    </div>
                 </EmptyText>
                 <EmptyText
-                    v-if="groupList.length > 0 && groupActiveType && list.length === 0"
+                    v-if="sourceList.length > 0 && groupActiveType && list.length === 0"
                 >
                     <template #text>
                         <div class="apm-empty-guide">
@@ -69,12 +77,14 @@
     <ProjectSetting v-model="isSettingState" :list="sourceList" @save-setting="onSaveSetting" />
 
     <InfoDialog ref="infoDialogRef" @sure="onInfoDialogSure"></InfoDialog>
+    <ConfirmDialog ref="confirmDialogRef"></ConfirmDialog>
 </template>
 <script setup lang="ts">
 import ProjectTab from "./tab.vue";
 import ProjectList from "./list.vue";
 import ProjectSetting from "./setting.vue"
 import InfoDialog from "./infoDialog.vue"
+import ConfirmDialog from "./confirmDialog.vue";
 import EmptyText from "./empty.vue"
 import ProjectManageBackground from "./background.vue";
 import ProjectCommandHeader from "./commandHeader.vue";
@@ -101,6 +111,7 @@ const {
     isSettingState,
     onSaveSetting,
     infoDialogRef,
+    confirmDialogRef,
     onInfoDialogSure,
     toolBarRule
 } = useWrap();

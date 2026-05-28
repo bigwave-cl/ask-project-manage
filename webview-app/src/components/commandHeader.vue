@@ -77,6 +77,41 @@
                             title="导入文件夹"
                             @click="emit('toolbar-click', 'chooseFolder')"
                         ></v-list-item>
+                        <div class="apm-menu__divider" aria-hidden="true"></div>
+                        <v-list-item
+                            class="apm-menu__item apm-menu__item--mint"
+                            prepend-icon="mdi-database-import-outline"
+                            title="导入配置"
+                            @click="emit('toolbar-click', 'importConfig')"
+                        ></v-list-item>
+                        <div
+                            class="apm-menu__submenu"
+                            :class="{ 'apm-menu__submenu--left': exportSubmenuAlign === 'left' }"
+                            @mouseenter="updateExportSubmenuAlign"
+                            @focusin="updateExportSubmenuAlign"
+                        >
+                            <v-list-item
+                                class="apm-menu__item apm-menu__item--coral"
+                                prepend-icon="mdi-database-export-outline"
+                                title="导出配置"
+                                append-icon="mdi-chevron-right"
+                                tabindex="0"
+                            ></v-list-item>
+                            <v-list density="compact" class="apm-menu apm-export-menu apm-menu__submenu-panel">
+                                <v-list-item
+                                    class="apm-menu__item apm-menu__item--mauve"
+                                    prepend-icon="mdi-code-json"
+                                    title="JSON"
+                                    @click="emit('toolbar-click', 'exportConfigJson')"
+                                ></v-list-item>
+                                <v-list-item
+                                    class="apm-menu__item apm-menu__item--mint"
+                                    prepend-icon="mdi-file-code-outline"
+                                    title="YML"
+                                    @click="emit('toolbar-click', 'exportConfigYml')"
+                                ></v-list-item>
+                            </v-list>
+                        </div>
                     </v-list>
                 </v-menu>
             </div>
@@ -100,7 +135,7 @@
                     <v-list-item
                         class="apm-menu__item apm-menu__item--coral"
                         prepend-icon="mdi-trash-can-outline"
-                        title="删除当前分组"
+                        :title="removeGroupTitle"
                         @click="emit('toolbar-click', 'removeGroup')"
                     ></v-list-item>
                 </v-list>
@@ -110,18 +145,38 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
+
 defineOptions({
     name: "ProjectCommandHeader",
 });
 
-defineProps<{
+withDefaults(defineProps<{
     searchKeyword: string;
-}>();
+    removeGroupTitle?: string;
+}>(), {
+    removeGroupTitle: "删除当前分组",
+});
 
 const emit = defineEmits<{
     "update:searchKeyword": [value: string];
     "toolbar-click": [type: string];
 }>();
+
+const exportSubmenuAlign = ref<"left" | "right">("right");
+const updateExportSubmenuAlign = (event: MouseEvent | FocusEvent) => {
+    const target = event.currentTarget as HTMLElement | null;
+    const panel = target?.querySelector<HTMLElement>(".apm-menu__submenu-panel");
+    if (!target || !panel) {
+        return;
+    }
+    const gap = 8;
+    const viewportPadding = 12;
+    const targetRect = target.getBoundingClientRect();
+    const panelWidth = panel.offsetWidth || 138;
+    const canOpenRight = targetRect.right + gap + panelWidth <= window.innerWidth - viewportPadding;
+    exportSubmenuAlign.value = canOpenRight ? "right" : "left";
+};
 </script>
 
 <style lang="scss">
@@ -436,7 +491,15 @@ const emit = defineEmits<{
 }
 
 .apm-import-menu {
-    min-width: 178px;
+    width: 198px;
+    min-width: 198px;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.apm-export-menu {
+    width: 138px;
+    min-width: 138px;
 }
 
 .apm-menu {
@@ -456,6 +519,15 @@ const emit = defineEmits<{
         0 0 34px color-mix(in srgb, var(--apm-riviera) 8%, transparent),
         inset 0 1px 0 rgba(255, 255, 255, .1);
     color: var(--apm-text-main);
+
+    &.apm-import-menu {
+        min-width: 198px;
+        overflow: visible !important;
+    }
+
+    &.apm-export-menu {
+        min-width: 138px;
+    }
 
     &::before,
     &::after {
@@ -501,7 +573,17 @@ const emit = defineEmits<{
     }
 
     .v-list-item__prepend {
-        margin-inline-end: 14px;
+        margin-inline-end: 4px;
+    }
+
+    .v-list-item__prepend > .v-icon ~ .v-list-item__spacer,
+    .v-list-item__append > .v-icon ~ .v-list-item__spacer,
+    .v-list-item__spacer {
+        width: 4px !important;
+    }
+
+    .v-list-item__append {
+        margin-inline-start: 4px;
     }
 
     .v-list-item-title {
@@ -528,6 +610,62 @@ const emit = defineEmits<{
         height: 1px;
         background: linear-gradient(90deg, transparent, color-mix(in srgb, currentColor 28%, transparent), transparent);
         opacity: .34;
+    }
+
+    .apm-menu__divider {
+        position: relative;
+        z-index: 1;
+        height: 1px;
+        margin: 7px 8px;
+        background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--apm-radio-silence) 24%, transparent), color-mix(in srgb, var(--apm-riviera) 18%, transparent), transparent);
+        opacity: .82;
+    }
+
+    .apm-menu__submenu {
+        position: relative;
+        z-index: 2;
+    }
+
+    .apm-menu__submenu::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 100%;
+        width: 10px;
+        height: 100%;
+    }
+
+    .apm-menu__submenu--left::after {
+        right: 100%;
+        left: auto;
+    }
+
+    .apm-menu__submenu-panel {
+        position: absolute;
+        left: calc(100% + 8px);
+        top: 0;
+        z-index: 3;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(-4px) scale(.98);
+        transform-origin: left top;
+        transition:
+            opacity 140ms ease,
+            transform 140ms ease;
+    }
+
+    .apm-menu__submenu--left > .apm-menu__submenu-panel {
+        right: calc(100% + 8px);
+        left: auto;
+        transform: translateX(4px) scale(.98);
+        transform-origin: right top;
+    }
+
+    .apm-menu__submenu:hover > .apm-menu__submenu-panel,
+    .apm-menu__submenu:focus-within > .apm-menu__submenu-panel {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0) scale(1);
     }
 
     .v-list-item:hover {

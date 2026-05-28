@@ -15,6 +15,9 @@
         "onStartupFinished"
     ],
     "main": "./out/extension.js",
+    "dependencies": {
+        "js-yaml": "^4.1.0"
+    },
     "contributes": {
         "commands": [
             {

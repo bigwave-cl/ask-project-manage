@@ -15,10 +15,14 @@ import {
     updateProjectList,
     updateProjectListAll,
     removeProjectList,
+    clearProjectList,
+    importConfig,
+    exportConfig,
     useMessageObserver,
 } from "./postMessage";
 import { buildConfigChildrenNode, buildConfigNode } from "./utils";
 import InfoDialog from "./infoDialog.vue";
+import ConfirmDialog from "./confirmDialog.vue";
 import { useToast } from "./toast";
 export const useWrap = () => {
     const sourceList = ref<ProjectConfigItemModel[]>([]);
@@ -114,7 +118,19 @@ export const useWrap = () => {
             useToast("复制失败，请在详情里手动复制");
         }
     };
+    const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog> | null>(null);
+    const confirmDanger = async (options: { title: string; content: string; confirmText?: string }) => {
+        return await confirmDialogRef.value?.openConfirm(options);
+    };
     const removeProject = async (item: ProjectRenderItemModel) => {
+        const confirmed = await confirmDanger({
+            title: "删除项目",
+            content: `确认删除「${item.name}」吗？\n该项目会从「${item.groupLabel}」分组移除。`,
+            confirmText: "删除项目",
+        });
+        if (!confirmed) {
+            return;
+        }
         await removeProjectByGroup(item.groupKey, [item.key]);
         useToast("项目已删除");
     };
@@ -159,11 +175,29 @@ export const useWrap = () => {
     };
     const handleChooseFolderClick = async () => {
         const files = await chooseFolder();
-        addProjectByGroup(files.data, "folder");
+        await addProjectByGroup(files.data, "folder");
     };
     const handleChooseWorkspaceClick = async () => {
         const files = await chooseWorkspace();
-        addProjectByGroup(files.data, "workspace");
+        await addProjectByGroup(files.data, "workspace");
+    };
+    const getResponseMessage = (response: { code?: number; data?: string | { message?: string; cancelled?: boolean } }) => {
+        if (typeof response.data === "string") {
+            return response.data;
+        }
+        return response.data?.message || "执行完成";
+    };
+    const handleImportConfigClick = async () => {
+        const response = await importConfig();
+        useToast(getResponseMessage(response));
+        if (response.code !== 200 || response.data.cancelled) {
+            return;
+        }
+        await initData();
+    };
+    const handleExportConfigClick = async (format: "json" | "yml") => {
+        const response = await exportConfig(format);
+        useToast(getResponseMessage(response));
     };
     const addGroup = async (name: string) => {
         const item: ProjectConfigItemModel = buildConfigNode(name);
@@ -180,17 +214,47 @@ export const useWrap = () => {
         updateProjectList(item);
     };
     const removeGroup = async (key: string) => {
+        if (sourceList.value.length === 0) {
+            useToast("请先添加一个分组信息！！！");
+            return;
+        }
         if (key === "all") {
-            useToast("请选择一个具体分组");
+            const confirmed = await confirmDanger({
+                title: "删除全部分组",
+                content: `确认删除全部 ${sourceList.value.length} 个分组和 ${totalProjectCount.value} 个项目吗？\n这个操作会清空当前所有项目配置。`,
+                confirmText: "删除全部",
+            });
+            if (!confirmed) {
+                return;
+            }
+            await clearProjectList();
+            sourceList.value = [];
+            groupActiveType.value = "all";
+            buildGroupList();
+            buildListByGroupActive();
+            useToast("全部分组已删除");
+            return;
+        }
+        const index = sourceList.value.findIndex(cur => cur.key === key);
+        if (index === -1) {
+            return;
+        }
+        const currentGroup = sourceList.value[index];
+        const confirmed = await confirmDanger({
+            title: "删除分组",
+            content: `确认删除「${currentGroup.label}」分组吗？\n分组内 ${currentGroup.children.length} 个项目也会一起移除。`,
+            confirmText: "删除分组",
+        });
+        if (!confirmed) {
             return;
         }
         await removeProjectList(key);
-        const index = sourceList.value.findIndex(cur => cur.key === key);
         if (index !== -1) {
             const proIndex = index === 0 ? index + 1 : index - 1;
-            groupActiveType.value = sourceList.value[proIndex] ? sourceList.value[proIndex].key : "";
+            groupActiveType.value = sourceList.value[proIndex] ? sourceList.value[proIndex].key : "all";
             sourceList.value.splice(index, 1);
             buildGroupList();
+            buildListByGroupActive();
         }
     };
     const removeProjectByGroup = async (key: string, keys: string[]) => {
@@ -243,6 +307,27 @@ export const useWrap = () => {
             icon: "mdi-book-plus-multiple-outline",
             tip: "导入工作区（可多选）",
         },
+        importConfig: {
+            action: () => {
+                handleImportConfigClick();
+            },
+            icon: "mdi-database-import-outline",
+            tip: "导入配置（JSON / YML）",
+        },
+        exportConfigJson: {
+            action: () => {
+                handleExportConfigClick("json");
+            },
+            icon: "mdi-code-json",
+            tip: "导出 JSON 配置",
+        },
+        exportConfigYml: {
+            action: () => {
+                handleExportConfigClick("yml");
+            },
+            icon: "mdi-file-code-outline",
+            tip: "导出 YML 配置",
+        },
         // 'removeProjectByGroup': {
         // action: () => {
         //     removeProjectByGroup(groupActiveType, [list[0].key]);
@@ -284,11 +369,6 @@ export const useWrap = () => {
     const handleToolbarClick = (type: string) => {
         const current = toolBarRule[type];
         if (!current) {
-            return;
-        }
-        const rule = ["removeGroup"];
-        if (rule.includes(type) && groupList.value.length === 0) {
-            useToast("请先添加一个分组信息！！！");
             return;
         }
         current.action();
@@ -343,6 +423,7 @@ export const useWrap = () => {
         isSettingState,
         onSaveSetting,
         infoDialogRef,
+        confirmDialogRef,
         onInfoDialogSure,
         toolBarRule,
     };

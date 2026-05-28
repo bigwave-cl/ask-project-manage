@@ -91,6 +91,20 @@ const clearProjectList = () => {
         data: {},
     });
 };
+const importConfig = () => {
+    return promisePostMessage<any, { message: string; cancelled?: boolean }>({
+        command: "import-config",
+        data: {},
+    });
+};
+const exportConfig = (format: "json" | "yml") => {
+    return promisePostMessage<{ format: "json" | "yml" }, { message: string; cancelled?: boolean }>({
+        command: "export-config",
+        data: {
+            format,
+        },
+    });
+};
 const openFolder = (url: string) => {
     return promisePostMessage({
         command: "open-folder",
@@ -211,5 +225,7 @@ export {
     updateProjectListAll,
     removeProjectList,
     clearProjectList,
+    importConfig,
+    exportConfig,
     useMessageObserver,
 };

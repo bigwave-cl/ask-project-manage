@@ -9,7 +9,7 @@ const useConfig = (context: vscode.ExtensionContext) => {
         return list || [];
     };
     const updateProjectList = (list: ProjectConfigItemModel[]) => {
-        context.globalState.update(configName, {
+        return context.globalState.update(configName, {
             list,
         });
     };
@@ -39,11 +39,82 @@ const useConfig = (context: vscode.ExtensionContext) => {
                 children: item.children,
             });
         }
-        updateProjectList(list);
+        return updateProjectList(list);
     };
     // 修改和新增
     const updateProjectListAll = (list: ProjectConfigItemModel[]) => {
-        updateProjectList(list);
+        return updateProjectList(list);
+    };
+    const createUniqueKey = (prefix: string, usedKeys: Set<string>) => {
+        let index = 0;
+        let key = "";
+        do {
+            key = `${prefix}-${Date.now()}-${index++}`;
+        } while (usedKeys.has(key));
+        usedKeys.add(key);
+        return key;
+    };
+    const createUniqueGroupLabel = (label: string, usedLabels: Set<string>) => {
+        const baseLabel = label.trim() || "未命名分组";
+        if (!usedLabels.has(baseLabel)) {
+            usedLabels.add(baseLabel);
+            return {
+                label: baseLabel,
+                renamed: false,
+            };
+        }
+        let index = 1;
+        let nextLabel = `${baseLabel}(${index})`;
+        while (usedLabels.has(nextLabel)) {
+            index += 1;
+            nextLabel = `${baseLabel}(${index})`;
+        }
+        usedLabels.add(nextLabel);
+        return {
+            label: nextLabel,
+            renamed: true,
+        };
+    };
+    const mergeProjectList = async (importList: ProjectConfigItemModel[]) => {
+        const list = getProjectList().slice();
+        const usedLabels = new Set(list.map(cur => cur.label));
+        const usedKeys = new Set<string>();
+        let renamedGroupCount = 0;
+        let projectCount = 0;
+
+        list.forEach(group => {
+            usedKeys.add(group.key);
+            group.children.forEach(project => {
+                usedKeys.add(project.key);
+            });
+        });
+
+        const nextList = importList.map(group => {
+            const groupLabel = createUniqueGroupLabel(group.label, usedLabels);
+            if (groupLabel.renamed) {
+                renamedGroupCount += 1;
+            }
+            const children = group.children.map(project => {
+                projectCount += 1;
+                return {
+                    ...project,
+                    key: createUniqueKey("project", usedKeys),
+                };
+            });
+            return {
+                key: createUniqueKey("group", usedKeys),
+                label: groupLabel.label,
+                children,
+            };
+        });
+
+        await updateProjectList(list.concat(nextList));
+
+        return {
+            groupCount: nextList.length,
+            projectCount,
+            renamedGroupCount,
+        };
     };
     // 存在subKey就是对children 处理不处理父级group
     const removeProjectListByKey = (key: string, subKey?: string[]) => {
@@ -56,16 +127,17 @@ const useConfig = (context: vscode.ExtensionContext) => {
             }else {
                 list.splice(index, 1);
             }
-            updateProjectList(list);
+            return updateProjectList(list);
         }
     };
     const clearProjectList = () => {
-        updateProjectList([]);
+        return updateProjectList([]);
     };
     return {
         getProjectList,
         updateProjectListByKey,
         updateProjectListAll,
+        mergeProjectList,
         removeProjectListByKey,
         clearProjectList,
     };

@@ -34,12 +34,14 @@
             </div>
         </div>
         <InfoDialog ref="infoDialogRef" @sure="sureEdit"></InfoDialog>
+        <ConfirmDialog ref="confirmDialogRef"></ConfirmDialog>
     </v-bottom-sheet>
 </template>
 <script setup lang="ts">
 import { watch, ref, toRaw } from "vue";
 // import SettingItem from "./settingItem.vue";
 import InfoDialog from "./infoDialog.vue";
+import ConfirmDialog from "./confirmDialog.vue";
 import EmptyText from "./empty.vue";
 import { ProjectConfigItemModel, FormDataModel } from "./types";
 import ProjectSettingDraggable from "./draggable.vue";
@@ -63,7 +65,6 @@ const emits = defineEmits<{
 }>();
 const handleItemClick = (item: { [key: string]: any }, type: string, parentId?: string) => {
     let _item = item as ProjectConfigItemModel | ProjectConfigItemModel["children"][number];
-    console.log('_item', _item,'=', parentId)
     if (type === "edit") {
         openEdit(_item, parentId);
     } else if (type === 'sort') {
@@ -73,6 +74,7 @@ const handleItemClick = (item: { [key: string]: any }, type: string, parentId?: 
     }
 };
 const infoDialogRef = ref<InstanceType<typeof InfoDialog> | null>(null);
+const confirmDialogRef = ref<InstanceType<typeof ConfirmDialog> | null>(null);
 const sureEdit = (formData: FormDataModel) => {
     if (formData.groupKey) {
         if (formData.subInfo && formData.subInfo === 'sort'){
@@ -183,7 +185,7 @@ const openSort = (item: ProjectConfigItemModel | ProjectConfigItemModel["childre
     infoDialogRef.value?.openEdit(formData);
 };
 
-const removeItem = (
+const removeItem = async (
     item: ProjectConfigItemModel | ProjectConfigItemModel["children"][number],
     parentId?: string
 ) => {
@@ -198,10 +200,27 @@ const removeItem = (
         if (subIndex === -1) {
             return;
         }
+        const confirmed = await confirmDialogRef.value?.openConfirm({
+            title: "删除项目",
+            content: `确认删除「${current.children[subIndex].name}」吗？\n该项目会从「${current.label}」分组移除。`,
+            confirmText: "删除项目",
+        });
+        if (!confirmed) {
+            return;
+        }
         current.children.splice(subIndex, 1);
     } else {
         const currentIndex = renderList.value.findIndex(cur => cur.key === item.key);
         if (currentIndex === -1) {
+            return;
+        }
+        const currentGroup = renderList.value[currentIndex];
+        const confirmed = await confirmDialogRef.value?.openConfirm({
+            title: "删除分组",
+            content: `确认删除「${currentGroup.label}」分组吗？\n分组内 ${currentGroup.children.length} 个项目也会一起移除。`,
+            confirmText: "删除分组",
+        });
+        if (!confirmed) {
             return;
         }
         renderList.value.splice(currentIndex, 1);

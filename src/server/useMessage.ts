@@ -4,7 +4,7 @@ import { openFolder, chooseFolder } from "./folder.hook";
 import { openWorkspace, chooseWorkspace } from "./workspace.hook";
 import { useConfig } from "./config";
 import { postMessage } from "./panel";
-import { debugLog } from "./debug";
+import { exportConfigFile, importConfigFile, type ConfigFileFormat } from "./configFile";
 class MessageEventHandler {
     configInstance: ReturnType<typeof useConfig> | null = null;
     constructor(options: { panel: vscode.WebviewPanel; context: vscode.ExtensionContext }) {
@@ -12,33 +12,17 @@ class MessageEventHandler {
         this.configInstance = useConfig(context);
     }
     async executeCommand(message: MessageParams<any>) {
-        debugLog("message.execute", "message received from webview", {
-            command: message.command,
-        });
         const commandName = message.command.replace(/(\-.{1,1})/gi, s => {
             return s[1].toUpperCase();
         });
         const methodName = (commandName + "Command") as keyof MessageEventHandler;
         if (this[methodName] && typeof this[methodName] === "function") {
-            debugLog("message.execute", "handler found", {
-                command: message.command,
-                methodName,
-            });
             const response = (await this[methodName](message.data)) as unknown as CommandHandlerData<any>;
-            debugLog("message.execute", "handler resolved", {
-                command: message.command,
-                methodName,
-                code: response.code || 200,
-            });
             return {
                 code: response.code || 200,
                 data: response.data || "执行完成",
             };
         } else {
-            debugLog("message.execute", "handler missing", {
-                command: message.command,
-                methodName,
-            });
             return {
                 code: 400,
                 data: 'command: "' + message.command + '" 不存在',
@@ -65,7 +49,6 @@ class MessageEventHandler {
     async removeProjectListCommand(
         data: MessageParams<{ key: string; subKey?: string[] }>["data"]
     ): Promise<CommandHandlerData<string>> {
-        console.log("data.subKey", data.subKey);
         await this.configInstance?.removeProjectListByKey(data.key, data.subKey);
         return { data: "执行成功" };
     }
@@ -75,23 +58,66 @@ class MessageEventHandler {
         await this.configInstance?.clearProjectList();
         return { data: "执行成功" };
     }
+    async importConfigCommand(): Promise<CommandHandlerData<{ message: string; cancelled?: boolean }>> {
+        try {
+            const result = await importConfigFile();
+            let message = result.message;
+            if (!result.cancelled) {
+                const mergeResult = await this.configInstance?.mergeProjectList(result.list);
+                const renameMessage = mergeResult?.renamedGroupCount
+                    ? `，${mergeResult.renamedGroupCount} 个同名分组已自动重命名`
+                    : "";
+                message = `配置已合并导入：新增 ${mergeResult?.groupCount || 0} 个分组，${mergeResult?.projectCount || 0} 个项目${renameMessage}`;
+            }
+            return {
+                data: {
+                    message,
+                    cancelled: result.cancelled,
+                },
+            };
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "配置导入失败";
+            return {
+                code: 400,
+                data: {
+                    message,
+                },
+            };
+        }
+    }
+    async exportConfigCommand(
+        data: MessageParams<{ format?: ConfigFileFormat }>["data"]
+    ): Promise<CommandHandlerData<{ message: string; cancelled?: boolean }>> {
+        try {
+            const format = data.format === "yml" ? "yml" : "json";
+            const list = this.configInstance?.getProjectList() || [];
+            const result = await exportConfigFile(list, format);
+            return {
+                data: {
+                    message: result.message,
+                    cancelled: result.cancelled,
+                },
+            };
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "配置导出失败";
+            return {
+                code: 400,
+                data: {
+                    message,
+                },
+            };
+        }
+    }
     async openFolderCommand(
         data: MessageParams<{
             path: string;
         }>["data"]
     ): Promise<CommandHandlerData<string>> {
-        debugLog("message.openFolder", "open folder command", {
-            path: data.path,
-        });
         await openFolder(data.path);
         return { data: "执行成功" };
     }
     async chooseFolderCommand(data: MessageParams<{}>["data"]): Promise<CommandHandlerData<any[]>> {
-        debugLog("message.chooseFolder", "choose folder command");
         const files = await chooseFolder();
-        debugLog("message.chooseFolder", "choose folder resolved", {
-            count: files.length,
-        });
         return { data: files };
     }
     async openWorkspaceCommand(
@@ -99,30 +125,19 @@ class MessageEventHandler {
             path: string;
         }>["data"]
     ): Promise<CommandHandlerData<string>> {
-        debugLog("message.openWorkspace", "open workspace command", {
-            path: data.path,
-        });
         await openWorkspace(data.path);
         return { data: "执行成功" };
     }
     async chooseWorkspaceCommand(data: MessageParams<{}>["data"]): Promise<CommandHandlerData<any[]>> {
-        debugLog("message.chooseWorkspace", "choose workspace command");
         const files = await chooseWorkspace();
-        debugLog("message.chooseWorkspace", "choose workspace resolved", {
-            count: files.length,
-        });
         return { data: files };
     }
 }
 const useMessage = (options: { panel: vscode.WebviewPanel; context: vscode.ExtensionContext }) => {
     const { panel, context } = options;
     const messageEventHandler = new MessageEventHandler(options);
-    debugLog("message.register", "register webview message listener");
     panel.webview.onDidReceiveMessage(
         async message => {
-            debugLog("message.listener", "onDidReceiveMessage fired", {
-                command: message.command,
-            });
             const response = await messageEventHandler.executeCommand(message);
             postMessage(panel, {
                 command: message.command + "-callback",
