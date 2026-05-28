@@ -6,8 +6,8 @@
             <span></span>
         </div>
         <div class="apm-command__identity">
-            <div class="apm-command__sigil">
-                <v-icon icon="mdi-star-four-points-outline"></v-icon>
+            <div class="apm-command__sigil" aria-hidden="true">
+                <img class="apm-command__sigil-logo" :src="commandLogoUrl" alt="" draggable="false">
             </div>
             <div>
                 <div class="apm-command__eyebrow">Ling Shu Console</div>
@@ -146,6 +146,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import commandLogoUrl from "../assets/logo.svg";
 
 defineOptions({
     name: "ProjectCommandHeader",
@@ -346,38 +347,27 @@ const updateExportSubmenuAlign = (event: MouseEvent | FocusEvent) => {
 
 .apm-command__sigil {
     position: relative;
-    width: 46px;
-    height: 46px;
+    width: 48px;
+    height: 48px;
     display: grid;
     place-items: center;
-    border: 1px solid color-mix(in srgb, var(--apm-radio-silence) 46%, transparent);
-    border-radius: 18px 8px 18px 8px;
-    background:
-        radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--apm-radio-silence) 24%, transparent), transparent 54%),
-        conic-gradient(from 120deg, color-mix(in srgb, var(--apm-radio-silence) 32%, transparent), transparent 24%, color-mix(in srgb, var(--apm-riviera) 20%, transparent), transparent 62%, color-mix(in srgb, var(--apm-radio-silence) 18%, transparent)),
-        rgba(5, 15, 17, .72);
-    box-shadow:
-        0 0 22px color-mix(in srgb, var(--apm-radio-silence) 18%, transparent),
-        inset 0 0 22px rgba(255, 255, 255, .06);
-    color: #8dffea;
-    font-size: 24px;
     transform: rotate(-3deg);
     animation: apm-command-sigil 8.4s ease-in-out infinite;
+}
 
-    &::before {
-        content: "";
-        position: absolute;
-        inset: 8px;
-        border: 1px dashed color-mix(in srgb, var(--apm-radio-silence) 32%, transparent);
-        border-radius: 50%;
-        animation: apm-command-sigil-ring 9s linear infinite;
-    }
-
-    .v-icon {
-        position: relative;
-        z-index: 1;
-        filter: drop-shadow(0 0 10px color-mix(in srgb, var(--apm-radio-silence) 54%, transparent));
-    }
+.apm-command__sigil-logo {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 54px;
+    height: 54px;
+    max-width: none;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    filter:
+        drop-shadow(0 0 12px color-mix(in srgb, var(--apm-radio-silence) 42%, transparent))
+        drop-shadow(0 8px 18px rgba(0, 0, 0, .38));
 }
 
 .apm-command__search {
