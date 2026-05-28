@@ -1,8 +1,29 @@
 # Ask Project Manage
 
+<p align="center">
+  <img src="dist-webview-app/logo.png" width="128" alt="Ask Project Manage Logo" />
+</p>
+
+<p align="center">
+  <strong>把 Cursor / VS Code 里的文件夹、工作区和项目分组，整理成一个可搜索、可备份、可迁移的本地项目控制台。</strong>
+</p>
+
+<p align="center">
+  灵枢控制台 · 本地存储 · 分组管理 · 配置导入导出
+</p>
+
 Ask Project Manage 是一个用于 Cursor / VS Code 的本地项目管理面板。它把常用的文件夹、`.code-workspace` 工作区和项目分组集中到一个可视化控制台里，让你不必在文件系统、最近打开列表和多个编辑器窗口之间来回翻找项目。
 
 插件首页是一个「灵枢控制台」式的项目台：顶部负责搜索、导入和管理，中间展示项目卡片，底部 HUD 实时汇总项目、文件夹、工作区和分组数量。
+
+## 核心能力
+
+- 统一管理文件夹项目和 `.code-workspace` 工作区
+- 按业务、团队、状态或阶段创建项目分组
+- 通过项目名称、路径、类型和分组快速搜索
+- 支持 JSON / YML 配置导入、导出、备份和迁移
+- 批量编辑分组和项目名称，调整排序并安全删除
+- 所有数据保存在本地编辑器状态中，不上传项目路径和配置
 
 ## 适合谁使用
 

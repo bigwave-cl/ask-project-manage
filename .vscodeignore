@@ -10,4 +10,6 @@ vsc-extension-quickstart.md
 **/*.ts
 **/.vscode-test.*
 webview-app/**
-
+*.vsix
+.codex-screens/**
+.DS_Store

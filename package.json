@@ -1,10 +1,10 @@
 {
     "name": "ask-project-manage",
     "displayName": "Ask Project Manage",
-    "description": "a project manage panel",
+    "description": "A local project cockpit for Cursor and VS Code.",
     "publisher": "ask-bobo",
     "icon": "dist-webview-app/logo.png",
-    "version": "0.0.5",
+    "version": "1.0.0",
     "engines": {
         "vscode": "^1.95.0"
     },
