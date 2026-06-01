@@ -4,12 +4,37 @@
     "description": "A local project cockpit for Cursor and VS Code.",
     "publisher": "ask-bobo",
     "icon": "dist-webview-app/logo.png",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "engines": {
         "vscode": "^1.95.0"
     },
     "categories": [
+        "Visualization",
         "Other"
+    ],
+    "keywords": [
+        "project manager",
+        "project management",
+        "project manage",
+        "workspace manager",
+        "workspace management",
+        "workspace",
+        "folder manager",
+        "local project",
+        "project dashboard",
+        "project cockpit",
+        "project switcher",
+        "project groups",
+        "code-workspace",
+        "cursor",
+        "vscode",
+        "import export",
+        "backup",
+        "项目管理",
+        "工作区管理",
+        "项目分组",
+        "项目切换",
+        "本地项目"
     ],
     "activationEvents": [
         "onStartupFinished"
