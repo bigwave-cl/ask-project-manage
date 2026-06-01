@@ -8,6 +8,7 @@ export default defineConfig({
     base: "./",
     build: {
         outDir: "../dist-webview-app",
+        emptyOutDir: true,
         rollupOptions: {
             input: "index.html",
         },
