@@ -41,6 +41,17 @@ export type ProjectChooseInfo = {
 export interface ProjectConfigItemModel extends ProjectGroupItemModel {
     children: Pick<ProjectItemModel, "name" | "key" | "source" | "path" | "type">[];
 }
+export type ProjectHudMetricKey = "project" | "folder" | "workspace" | "group";
+export type ProjectPreferencesModel = {
+    autoOpenPanel: boolean;
+    hud: {
+        visible: boolean;
+        metrics: Record<ProjectHudMetricKey, boolean>;
+    };
+    onboarding: {
+        seen: boolean;
+    };
+};
 
 export type FormDataModel = {
     name?: string;

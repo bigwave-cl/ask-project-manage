@@ -8,6 +8,7 @@ import {
 } from "./server/panel";
 import { useWindowState } from "./server/useWindowState";
 import { crateStatusBar } from "./server/statusBar";
+import { usePreferences } from "./server/preferences";
 import { CommandTypes } from "./types";
 
 // This method is called when your extension is activated
@@ -24,9 +25,11 @@ export function activate(context: vscode.ExtensionContext) {
         createPanel(context);
     });
     context.subscriptions.push(disposable);
-    setTimeout(() => {
-        openPanel();
-    }, 0);
+    if (usePreferences(context).getPreferences().autoOpenPanel) {
+        setTimeout(() => {
+            openPanel();
+        }, 0);
+    }
 }
 // This method is called when your extension is deactivated
 export async function deactivate() {

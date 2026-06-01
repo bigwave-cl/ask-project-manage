@@ -128,9 +128,15 @@
                     ></v-list-item>
                     <v-list-item
                         class="apm-menu__item apm-menu__item--mauve"
-                        prepend-icon="mdi-cog-outline"
+                        prepend-icon="mdi-playlist-edit"
                         title="批量管理"
                         @click="emit('toolbar-click', 'setting')"
+                    ></v-list-item>
+                    <v-list-item
+                        class="apm-menu__item apm-menu__item--mauve"
+                        prepend-icon="mdi-tune-variant"
+                        title="设置"
+                        @click="emit('toolbar-click', 'preferences')"
                     ></v-list-item>
                     <v-list-item
                         class="apm-menu__item apm-menu__item--coral"

@@ -1,10 +1,10 @@
 {
     "name": "ask-project-manage",
-    "displayName": "Ask Project Manage",
-    "description": "A local project cockpit for Cursor and VS Code.",
+    "displayName": "Ask Project Manager",
+    "description": "Project manager for Cursor and VS Code. Organize local folders, workspaces, project groups, search, backup, import and export projects.",
     "publisher": "ask-bobo",
     "icon": "dist-webview-app/logo.png",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "engines": {
         "vscode": "^1.95.0"
     },
@@ -15,26 +15,19 @@
     "keywords": [
         "project manager",
         "project management",
-        "project manage",
+        "cursor project manager",
+        "vscode project manager",
         "workspace manager",
         "workspace management",
-        "workspace",
-        "folder manager",
-        "local project",
-        "project dashboard",
-        "project cockpit",
+        "workspace switcher",
         "project switcher",
-        "project groups",
+        "project organizer",
+        "project dashboard",
         "code-workspace",
-        "cursor",
-        "vscode",
-        "import export",
-        "backup",
+        "local project",
         "项目管理",
         "工作区管理",
-        "项目分组",
-        "项目切换",
-        "本地项目"
+        "项目分组"
     ],
     "activationEvents": [
         "onStartupFinished"

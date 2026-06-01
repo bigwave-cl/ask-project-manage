@@ -64,18 +64,10 @@
             </svg>
 
             <div class="apm-cockpit__body">
-                <div class="apm-cockpit__core" aria-hidden="true">
-                    <div class="apm-core-orbit">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                    <div class="apm-core-dial">
-                        <v-icon icon="mdi-star-four-points-outline"></v-icon>
-                    </div>
-                </div>
-
-                <div class="apm-cockpit__metrics">
+                <div
+                    class="apm-cockpit__metrics"
+                    :style="{ '--hud-metric-count': String(Math.max(1, metrics.length)) }"
+                >
                     <article
                         v-for="metric in metrics"
                         :key="metric.key"
@@ -148,6 +140,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import type { ProjectHudMetricKey } from "./types";
 
 defineOptions({
     name: "ProjectHudDashboard",
@@ -159,6 +152,7 @@ const props = defineProps<{
     folderCount: number;
     workspaceCount: number;
     groupCount: number;
+    visibleMetricKeys: ProjectHudMetricKey[];
 }>();
 
 const cockpitRef = ref<HTMLElement | null>(null);
@@ -206,7 +200,7 @@ const metrics = computed(() => [
         icon: "mdi-orbit-variant",
         level: getMetricLevel(props.groupCount),
     },
-]);
+].filter(metric => props.visibleMetricKeys.includes(metric.key as ProjectHudMetricKey)));
 
 const handleCockpitPointerMove = (event: PointerEvent) => {
     const target = event.currentTarget as HTMLElement;
@@ -228,7 +222,7 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
 .apm-cockpit {
     position: absolute;
     left: 50%;
-    bottom: -36px;
+    bottom: 12px;
     z-index: 4;
     width: 980px;
     max-width: calc(100% - 64px);
@@ -243,13 +237,13 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
 .apm-cockpit__panel {
     --cockpit-x: 50%;
     --cockpit-y: 20%;
-    --cockpit-stage-y: -68px;
+    --cockpit-stage-y: 38px;
     --cockpit-edge-fade:
         linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%),
         linear-gradient(180deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
     position: relative;
-    min-height: 282px;
-    padding: 36px 38px 78px;
+    min-height: 130px;
+    padding: 0 38px;
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -377,152 +371,19 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
     position: relative;
     z-index: 2;
     display: grid;
-    grid-template-columns: 168px 1fr;
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
-    min-height: 150px;
-    width: min(720px, 100%);
+    min-height: 118px;
+    width: min(540px, 100%);
     margin: 0 auto;
-    transform: translate3d(0, 8px, 32px);
+    transform: translateY(12px);
     transform-style: preserve-3d;
-}
-
-.apm-cockpit__core {
-    position: relative;
-    min-height: 116px;
-    border: 1px solid color-mix(in srgb, var(--apm-radio-silence) 28%, transparent);
-    border-radius: 50%;
-    background:
-        radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--apm-radio-silence) 28%, transparent), transparent 54%),
-        linear-gradient(180deg, rgba(6, 20, 35, .78), rgba(3, 8, 18, .86));
-    box-shadow:
-        0 16px 34px rgba(0, 0, 0, .3),
-        0 0 32px rgba(80, 196, 255, .2),
-        inset 0 0 28px rgba(0, 0, 0, .18);
-    overflow: hidden;
-    transform: translateY(8px) rotate(-4deg) scaleX(1.04);
-    transform-origin: 50% 52%;
-    animation: apm-core-uneven-orbit 9.6s ease-in-out infinite;
-
-    &::before {
-        content: "";
-        position: absolute;
-        z-index: 2;
-        left: 50%;
-        top: 50%;
-        width: 132px;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        border: 1px dashed color-mix(in srgb, var(--apm-radio-silence) 44%, transparent);
-        transform: translate(-50%, -50%);
-        animation: apm-orbit-spin 12s linear infinite;
-    }
-
-    &::after {
-        content: "";
-        position: absolute;
-        z-index: 1;
-        inset: -18%;
-        border-radius: 50%;
-        background:
-            conic-gradient(
-                from -18deg,
-                transparent 0deg,
-                transparent 208deg,
-                color-mix(in srgb, var(--apm-radio-silence) 12%, transparent) 238deg,
-                rgba(249, 247, 232, .46) 270deg,
-                color-mix(in srgb, var(--apm-radio-silence) 28%, transparent) 292deg,
-                transparent 326deg,
-                transparent 360deg
-            );
-        filter: blur(1.2px);
-        mix-blend-mode: screen;
-        opacity: .78;
-        transform-origin: 50% 50%;
-        animation: apm-core-sweep 4.8s linear infinite;
-    }
-}
-
-.apm-core-orbit {
-    position: absolute;
-    z-index: 3;
-    inset: 18px;
-    border-radius: 50%;
-    border: 1px solid color-mix(in srgb, var(--apm-riviera) 28%, transparent);
-    animation: apm-orbit-spin 8s linear infinite reverse;
-
-    span {
-        position: absolute;
-        left: 50%;
-        top: -3px;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--apm-riviera);
-        box-shadow: 0 0 14px var(--apm-riviera);
-        transform-origin: 0 54px;
-
-        &:nth-child(2) {
-            background: var(--apm-radio-silence);
-            box-shadow: 0 0 14px var(--apm-radio-silence);
-            transform: rotate(122deg);
-        }
-
-        &:nth-child(3) {
-            width: 4px;
-            height: 4px;
-            background: var(--apm-swan-dive);
-            transform: rotate(246deg);
-        }
-    }
-}
-
-.apm-core-dial {
-    position: absolute;
-    z-index: 4;
-    left: 50%;
-    top: 50%;
-    width: 54px;
-    aspect-ratio: 1;
-    display: grid;
-    place-items: center;
-    border: 1px solid color-mix(in srgb, var(--apm-radio-silence) 26%, transparent);
-    border-radius: 50%;
-    color: #7ff8e5;
-    background:
-        radial-gradient(circle at 50% 45%, rgba(249, 247, 232, .12), transparent 26%),
-        radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--apm-radio-silence) 18%, transparent), transparent 58%),
-        rgba(5, 13, 15, .58);
-    box-shadow:
-        0 0 24px color-mix(in srgb, var(--apm-radio-silence) 24%, transparent),
-        inset 0 0 18px rgba(255, 255, 255, .08);
-    transform: translate(-50%, -50%);
-
-    &::before {
-        content: "";
-        position: absolute;
-        inset: 9px;
-        border: 1px solid color-mix(in srgb, var(--apm-radio-silence) 38%, transparent);
-        border-radius: 50%;
-        box-shadow:
-            0 0 12px color-mix(in srgb, var(--apm-radio-silence) 18%, transparent),
-            inset 0 0 10px color-mix(in srgb, var(--apm-riviera) 10%, transparent);
-    }
-
-    .v-icon {
-        position: relative;
-        z-index: 1;
-        font-size: 25px;
-        filter:
-            drop-shadow(0 0 7px color-mix(in srgb, var(--apm-radio-silence) 62%, transparent))
-            drop-shadow(0 0 16px color-mix(in srgb, var(--apm-riviera) 22%, transparent));
-    }
 }
 
 .apm-cockpit__metrics {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(var(--hud-metric-count, 4), minmax(0, 1fr));
+    gap: 12px;
     align-items: end;
 }
 
@@ -658,7 +519,7 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
     grid-template-columns: 1fr 90px 1fr;
     gap: 12px;
     width: min(560px, 76%);
-    margin: 16px auto 0;
+    margin: 8px auto 0;
 
     span {
         height: 2px;
@@ -674,7 +535,7 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
 .apm-cockpit__adhesion {
     position: absolute;
     left: 50%;
-    bottom: -8px;
+    bottom: -28px;
     z-index: 1;
     width: min(940px, 96%);
     height: 96px;
@@ -910,41 +771,6 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
     animation: apm-scanner-slide 4.2s ease-in-out infinite;
 }
 
-@keyframes apm-orbit-spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes apm-core-uneven-orbit {
-    0%,
-    100% {
-        transform: translateY(8px) rotate(-4deg) scaleX(1.04) scaleY(.96);
-    }
-
-    21% {
-        transform: translateY(4px) rotate(9deg) scaleX(.98) scaleY(1.02);
-    }
-
-    47% {
-        transform: translateY(10px) rotate(-15deg) scaleX(1.08) scaleY(.94);
-    }
-
-    68% {
-        transform: translateY(5px) rotate(18deg) scaleX(.96) scaleY(1.04);
-    }
-
-    84% {
-        transform: translateY(9px) rotate(3deg) scaleX(1.02) scaleY(.98);
-    }
-}
-
-@keyframes apm-core-sweep {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
 @keyframes apm-circuit-flow {
     to {
         stroke-dashoffset: -108;
@@ -1012,20 +838,16 @@ const handleCockpitPointerLeave = (event: PointerEvent) => {
 @media (max-width: 900px) {
     .apm-cockpit {
         --cockpit-mobile-scale: .78;
-        bottom: 14px;
+        bottom: 12px;
         max-width: none;
     }
 
     .apm-cockpit__panel {
-        padding: 34px 38px 76px;
+        padding: 0 38px;
     }
 
     .apm-cockpit__body {
-        grid-template-columns: 168px 1fr;
-    }
-
-    .apm-cockpit__core {
-        display: block;
+        width: min(540px, 100%);
     }
 
     .apm-cockpit__metrics {

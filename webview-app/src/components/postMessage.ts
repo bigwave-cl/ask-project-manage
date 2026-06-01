@@ -1,4 +1,4 @@
-import type { CommandHandlerData, MessageParams, ProjectConfigItemModel, EventTypes } from "./types";
+import type { CommandHandlerData, MessageParams, ProjectConfigItemModel, ProjectPreferencesModel, EventTypes } from "./types";
 // const isDev = import.meta.env.DEV;
 type PostMessageVsCodeModel = {
     postMessage: (opt: { command: string; data: any; from: "webview" | "vscode"; to: "webview" | "vscode" }) => void;
@@ -58,6 +58,20 @@ const getConfigList = () => {
     return promisePostMessage<any, ProjectConfigItemModel[]>({
         command: "get-config-list",
         data: {},
+    });
+};
+const getPreferences = () => {
+    return promisePostMessage<any, ProjectPreferencesModel>({
+        command: "get-preferences",
+        data: {},
+    });
+};
+const updatePreferences = (preferences: ProjectPreferencesModel) => {
+    return promisePostMessage<{ preferences: ProjectPreferencesModel }, ProjectPreferencesModel>({
+        command: "update-preferences",
+        data: {
+            preferences,
+        },
     });
 };
 const updateProjectList = (item: ProjectConfigItemModel) => {
@@ -221,6 +235,8 @@ export {
     chooseFolder,
     chooseWorkspace,
     getConfigList,
+    getPreferences,
+    updatePreferences,
     updateProjectList,
     updateProjectListAll,
     removeProjectList,

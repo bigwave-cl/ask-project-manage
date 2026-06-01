@@ -1,15 +1,18 @@
 import * as vscode from "vscode";
-import type { MessageParams, CommandHandlerData, ProjectConfigItemModel } from "../types";
+import type { MessageParams, CommandHandlerData, ProjectConfigItemModel, ProjectPreferencesModel } from "../types";
 import { openFolder, chooseFolder } from "./folder.hook";
 import { openWorkspace, chooseWorkspace } from "./workspace.hook";
 import { useConfig } from "./config";
+import { usePreferences } from "./preferences";
 import { postMessage } from "./panel";
 import { exportConfigFile, importConfigFile, type ConfigFileFormat } from "./configFile";
 class MessageEventHandler {
     configInstance: ReturnType<typeof useConfig> | null = null;
+    preferencesInstance: ReturnType<typeof usePreferences> | null = null;
     constructor(options: { panel: vscode.WebviewPanel; context: vscode.ExtensionContext }) {
         const { context } = options;
         this.configInstance = useConfig(context);
+        this.preferencesInstance = usePreferences(context);
     }
     async executeCommand(message: MessageParams<any>) {
         const commandName = message.command.replace(/(\-.{1,1})/gi, s => {
@@ -33,6 +36,17 @@ class MessageEventHandler {
     async getConfigListCommand(data: MessageParams<{}>["data"]): Promise<CommandHandlerData<ProjectConfigItemModel[]>> {
         const list = await this.configInstance?.getProjectList();
         return { data: list || [] };
+    }
+    async getPreferencesCommand(): Promise<CommandHandlerData<ProjectPreferencesModel>> {
+        const preferences = this.preferencesInstance?.getPreferences();
+        return { data: preferences! };
+    }
+    async updatePreferencesCommand(
+        data: MessageParams<{ preferences: ProjectPreferencesModel }>["data"]
+    ): Promise<CommandHandlerData<ProjectPreferencesModel>> {
+        await this.preferencesInstance?.updatePreferences(data.preferences);
+        const preferences = this.preferencesInstance?.getPreferences();
+        return { data: preferences! };
     }
     async updateProjectListCommand(
         data: MessageParams<{ item: ProjectConfigItemModel }>["data"]

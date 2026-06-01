@@ -1,7 +1,13 @@
 <template>
     <div class="ask-project-manage-wrap">
         <ProjectManageBackground />
-        <div class="apm-shell" :class="{ 'apm-shell--with-tabs': sourceList.length > 1 }">
+        <div
+            class="apm-shell"
+            :class="{
+                'apm-shell--with-tabs': sourceList.length > 1,
+                'apm-shell--without-hud': !shouldShowHud,
+            }"
+        >
             <div class="apm-shell__sticky">
                 <ProjectCommandHeader
                     v-model:search-keyword="searchKeyword"
@@ -66,15 +72,27 @@
             </div>
 
             <ProjectHudDashboard
+                v-if="shouldShowHud"
                 :current-group-label="currentGroupLabel"
                 :total-project-count="totalProjectCount"
                 :folder-count="folderCount"
                 :workspace-count="workspaceCount"
                 :group-count="sourceList.length"
+                :visible-metric-keys="visibleHudMetricKeys"
             />
         </div>
     </div>
     <ProjectSetting v-model="isSettingState" :list="sourceList" @save-setting="onSaveSetting" />
+    <ProjectPreferenceSetting
+        v-model="isPreferenceState"
+        :preferences="preferences"
+        @save-preferences="onSavePreferences"
+        @open-guide="openOnboardingGuide"
+    />
+    <ProjectOnboardingGuide
+        v-model="isOnboardingState"
+        @finish="onFinishOnboardingGuide"
+    />
 
     <InfoDialog ref="infoDialogRef" @sure="onInfoDialogSure"></InfoDialog>
     <ConfirmDialog ref="confirmDialogRef"></ConfirmDialog>
@@ -89,6 +107,8 @@ import EmptyText from "./empty.vue"
 import ProjectManageBackground from "./background.vue";
 import ProjectCommandHeader from "./commandHeader.vue";
 import ProjectHudDashboard from "./projectHudDashboard.vue";
+import ProjectPreferenceSetting from "./preferenceSetting.vue";
+import ProjectOnboardingGuide from "./onboardingGuide.vue";
 import { useWrap } from "./useWrap"
 defineOptions({
     name: "ProjectManageWrap"
@@ -108,8 +128,16 @@ const {
     totalProjectCount,
     workspaceCount,
     folderCount,
+    preferences,
+    shouldShowHud,
+    visibleHudMetricKeys,
+    isOnboardingState,
     isSettingState,
+    isPreferenceState,
     onSaveSetting,
+    onSavePreferences,
+    openOnboardingGuide,
+    onFinishOnboardingGuide,
     infoDialogRef,
     confirmDialogRef,
     onInfoDialogSure,
@@ -155,6 +183,12 @@ const {
 
     .apm-shell--with-tabs {
         --apm-sticky-safe-space: 150px;
+    }
+
+    .apm-shell--without-hud {
+        .apm-list {
+            padding-bottom: 56px;
+        }
     }
 
     .apm-shell__sticky {

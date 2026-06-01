@@ -26,6 +26,17 @@ export type ProjectConfigItemModel = {
     label: string;
     children: ProjectItemModel[];
 };
+export type ProjectHudMetricKey = "project" | "folder" | "workspace" | "group";
+export type ProjectPreferencesModel = {
+    autoOpenPanel: boolean;
+    hud: {
+        visible: boolean;
+        metrics: Record<ProjectHudMetricKey, boolean>;
+    };
+    onboarding: {
+        seen: boolean;
+    };
+};
 export enum CommandTypes {
     open = "ask-project-manage.openPanel",
     close = "ask-project-manage.closePanel",

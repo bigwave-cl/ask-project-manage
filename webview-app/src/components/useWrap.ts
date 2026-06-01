@@ -5,6 +5,8 @@ import {
     ProjectConfigItemModel,
     ProjectRenderItemModel,
     FormDataModel,
+    ProjectHudMetricKey,
+    ProjectPreferencesModel,
     EventTypes,
 } from "./types";
 import {
@@ -12,6 +14,8 @@ import {
     chooseFolder,
     chooseWorkspace,
     getConfigList,
+    getPreferences,
+    updatePreferences,
     updateProjectList,
     updateProjectListAll,
     removeProjectList,
@@ -25,8 +29,25 @@ import InfoDialog from "./infoDialog.vue";
 import ConfirmDialog from "./confirmDialog.vue";
 import { useToast } from "./toast";
 export const useWrap = () => {
+    const defaultPreferences: ProjectPreferencesModel = {
+        autoOpenPanel: true,
+        hud: {
+            visible: true,
+            metrics: {
+                project: true,
+                folder: true,
+                workspace: true,
+                group: true,
+            },
+        },
+        onboarding: {
+            seen: false,
+        },
+    };
     const sourceList = ref<ProjectConfigItemModel[]>([]);
     const list = ref<ProjectRenderItemModel[]>([]);
+    const preferences = ref<ProjectPreferencesModel>(defaultPreferences);
+    const isOnboardingState = ref(false);
     const currentItemPath = ref("");
     const groupActiveType = ref("all");
     const searchKeyword = ref("");
@@ -46,6 +67,22 @@ export const useWrap = () => {
         }, 0);
     });
     const folderCount = computed(() => totalProjectCount.value - workspaceCount.value);
+    const visibleHudMetricKeys = computed<ProjectHudMetricKey[]>(() => {
+        if (!preferences.value.hud.visible) {
+            return [];
+        }
+        return (Object.entries(preferences.value.hud.metrics) as [ProjectHudMetricKey, boolean][])
+            .filter(([, visible]) => visible)
+            .map(([key]) => key);
+    });
+    const shouldShowHud = computed(() => preferences.value.hud.visible && visibleHudMetricKeys.value.length > 0);
+    const initPreferences = async () => {
+        const response = await getPreferences();
+        preferences.value = response.data;
+        if (!response.data.onboarding.seen) {
+            isOnboardingState.value = true;
+        }
+    };
     const initData = async () => {
         const response = await getConfigList();
         sourceList.value = response.data;
@@ -286,6 +323,7 @@ export const useWrap = () => {
     };
 
     const isSettingState = ref(false);
+    const isPreferenceState = ref(false);
     const toolBarRule: {
         [key: string]: {
             action: Function;
@@ -358,6 +396,13 @@ export const useWrap = () => {
             icon: "mdi-cog-outline",
             tip: "进入管理模式",
         },
+        preferences: {
+            action: () => {
+                isPreferenceState.value = true;
+            },
+            icon: "mdi-tune-variant",
+            tip: "设置",
+        },
     };
     const toolBarList = Object.entries(toolBarRule).map(([key, value]) => {
         return {
@@ -378,12 +423,31 @@ export const useWrap = () => {
         await initData();
         buildListByGroupActive();
     };
+    const onSavePreferences = async (newPreferences: ProjectPreferencesModel) => {
+        const response = await updatePreferences(newPreferences);
+        preferences.value = response.data;
+        useToast("设置已保存");
+    };
+    const openOnboardingGuide = () => {
+        isOnboardingState.value = true;
+    };
+    const onFinishOnboardingGuide = async () => {
+        const nextPreferences: ProjectPreferencesModel = {
+            ...preferences.value,
+            onboarding: {
+                seen: true,
+            },
+        };
+        const response = await updatePreferences(nextPreferences);
+        preferences.value = response.data;
+    };
     watch(groupActiveType, () => {
         onGroupChange();
     });
     watch(searchKeyword, () => {
         buildListByGroupActive();
     });
+    initPreferences();
     initData();
     const updateGlobalData = async () => {
         await initData();
@@ -401,6 +465,10 @@ export const useWrap = () => {
     return {
         sourceList,
         list,
+        preferences,
+        shouldShowHud,
+        visibleHudMetricKeys,
+        isOnboardingState,
         searchKeyword,
         groupActiveType,
         groupList,
@@ -421,7 +489,11 @@ export const useWrap = () => {
         handleToolbarClick,
         toolBarList,
         isSettingState,
+        isPreferenceState,
         onSaveSetting,
+        onSavePreferences,
+        openOnboardingGuide,
+        onFinishOnboardingGuide,
         infoDialogRef,
         confirmDialogRef,
         onInfoDialogSure,
