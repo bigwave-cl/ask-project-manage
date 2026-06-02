@@ -1,5 +1,10 @@
 import * as vscode from "vscode";
-import type { MessageParams, CommandHandlerData, ProjectConfigItemModel, ProjectPreferencesModel } from "../types";
+import type {
+    MessageParams,
+    CommandHandlerData,
+    ProjectConfigItemModel,
+    ProjectPreferencesModel,
+} from "../types";
 import { openFolder, chooseFolder } from "./folder.hook";
 import { openWorkspace, chooseWorkspace } from "./workspace.hook";
 import { useConfig } from "./config";
@@ -23,7 +28,7 @@ class MessageEventHandler {
             const response = (await this[methodName](message.data)) as unknown as CommandHandlerData<any>;
             return {
                 code: response.code || 200,
-                data: response.data || "执行完成",
+                data: response.data ?? "执行完成",
             };
         } else {
             return {
@@ -39,6 +44,14 @@ class MessageEventHandler {
     }
     async getPreferencesCommand(): Promise<CommandHandlerData<ProjectPreferencesModel>> {
         const preferences = this.preferencesInstance?.getPreferences();
+        return { data: preferences! };
+    }
+    async shouldShowOnboardingCommand(): Promise<CommandHandlerData<boolean>> {
+        const shouldShow = await this.preferencesInstance?.shouldShowOnboarding();
+        return { data: Boolean(shouldShow) };
+    }
+    async markOnboardingSeenCommand(): Promise<CommandHandlerData<ProjectPreferencesModel>> {
+        const preferences = await this.preferencesInstance?.markOnboardingSeen();
         return { data: preferences! };
     }
     async updatePreferencesCommand(

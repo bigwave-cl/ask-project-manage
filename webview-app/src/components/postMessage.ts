@@ -1,4 +1,10 @@
-import type { CommandHandlerData, MessageParams, ProjectConfigItemModel, ProjectPreferencesModel, EventTypes } from "./types";
+import type {
+    CommandHandlerData,
+    MessageParams,
+    ProjectConfigItemModel,
+    ProjectPreferencesModel,
+    EventTypes,
+} from "./types";
 // const isDev = import.meta.env.DEV;
 type PostMessageVsCodeModel = {
     postMessage: (opt: { command: string; data: any; from: "webview" | "vscode"; to: "webview" | "vscode" }) => void;
@@ -37,13 +43,6 @@ const promisePostMessage = <T extends any, K extends any>(
             });
             return;
         }
-        console.log("options.data", options.data);
-        vscode.postMessage({
-            command: options.command,
-            data: options.data,
-            from: "webview",
-            to: "vscode",
-        });
         const handler = (event: MessageEvent<any>) => {
             const message = event.data as MessageParams<T>;
             if (message.command === options.command + "-callback") {
@@ -52,6 +51,12 @@ const promisePostMessage = <T extends any, K extends any>(
             }
         };
         window.addEventListener("message", handler);
+        vscode.postMessage({
+            command: options.command,
+            data: options.data,
+            from: "webview",
+            to: "vscode",
+        });
     });
 };
 const getConfigList = () => {
@@ -72,6 +77,18 @@ const updatePreferences = (preferences: ProjectPreferencesModel) => {
         data: {
             preferences,
         },
+    });
+};
+const shouldShowOnboarding = () => {
+    return promisePostMessage<any, boolean>({
+        command: "should-show-onboarding",
+        data: {},
+    });
+};
+const markOnboardingSeen = () => {
+    return promisePostMessage<any, ProjectPreferencesModel>({
+        command: "mark-onboarding-seen",
+        data: {},
     });
 };
 const updateProjectList = (item: ProjectConfigItemModel) => {
@@ -237,6 +254,8 @@ export {
     getConfigList,
     getPreferences,
     updatePreferences,
+    shouldShowOnboarding,
+    markOnboardingSeen,
     updateProjectList,
     updateProjectListAll,
     removeProjectList,

@@ -2,6 +2,8 @@ import * as vscode from "vscode";
 import { ProjectPreferencesModel } from "../types";
 
 const preferencesName = "ask-project-manage.preferences";
+const onboardingAutoOpenClaimedName = "ask-project-manage.onboarding.autoOpenClaimed";
+let onboardingAutoOpenReserved = false;
 
 const defaultPreferences: ProjectPreferencesModel = {
     autoOpenPanel: true,
@@ -44,9 +46,36 @@ const usePreferences = (context: vscode.ExtensionContext) => {
     const updatePreferences = (preferences: ProjectPreferencesModel) => {
         return context.globalState.update(preferencesName, normalizePreferences(preferences));
     };
+    const shouldShowOnboarding = async () => {
+        const preferences = getPreferences();
+        if (preferences.onboarding.seen || onboardingAutoOpenReserved) {
+            return false;
+        }
+        const hasClaimed = context.globalState.get<boolean>(onboardingAutoOpenClaimedName, false);
+        if (hasClaimed) {
+            return false;
+        }
+        onboardingAutoOpenReserved = true;
+        await context.globalState.update(onboardingAutoOpenClaimedName, true);
+        return true;
+    };
+    const markOnboardingSeen = async () => {
+        const preferences = normalizePreferences({
+            ...getPreferences(),
+            onboarding: {
+                seen: true,
+            },
+        });
+        await context.globalState.update(preferencesName, preferences);
+        await context.globalState.update(onboardingAutoOpenClaimedName, true);
+        onboardingAutoOpenReserved = true;
+        return preferences;
+    };
     return {
         getPreferences,
         updatePreferences,
+        shouldShowOnboarding,
+        markOnboardingSeen,
     };
 };
 

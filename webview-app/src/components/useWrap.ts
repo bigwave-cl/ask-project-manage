@@ -15,6 +15,8 @@ import {
     chooseWorkspace,
     getConfigList,
     getPreferences,
+    shouldShowOnboarding,
+    markOnboardingSeen,
     updatePreferences,
     updateProjectList,
     updateProjectListAll,
@@ -79,7 +81,8 @@ export const useWrap = () => {
     const initPreferences = async () => {
         const response = await getPreferences();
         preferences.value = response.data;
-        if (!response.data.onboarding.seen) {
+        const onboardingResponse = await shouldShowOnboarding();
+        if (onboardingResponse.data) {
             isOnboardingState.value = true;
         }
     };
@@ -438,8 +441,13 @@ export const useWrap = () => {
                 seen: true,
             },
         };
-        const response = await updatePreferences(nextPreferences);
-        preferences.value = response.data;
+        preferences.value = nextPreferences;
+        try {
+            const response = await markOnboardingSeen();
+            preferences.value = response.data;
+        } catch (error) {
+            useToast("新手引导状态保存失败，请稍后重试");
+        }
     };
     watch(groupActiveType, () => {
         onGroupChange();
