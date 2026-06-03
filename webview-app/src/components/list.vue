@@ -11,6 +11,7 @@
                 @item-remove="handleItemRemove"
             ></ProjectCard>
         </template>
+        <div v-if="reserveHudSpace" class="ask-project-manage-list__hud-spacer" aria-hidden="true"></div>
     </div>
 </template>
 <script setup lang="ts">
@@ -22,10 +23,12 @@ defineOptions({
 })
 const props = withDefaults(defineProps<{
     list: ProjectRenderItemModel[]
+    reserveHudSpace?: boolean
 }>(), {
     list: ()=> {
         return [] as ProjectRenderItemModel[]
-    }
+    },
+    reserveHudSpace: false,
 })
 
 const emits = defineEmits<{
@@ -258,6 +261,12 @@ onUnmounted(() => {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 18px;
+
+    .ask-project-manage-list__hud-spacer {
+        grid-column: 1 / -1;
+        height: 174px;
+        pointer-events: none;
+    }
 
     .ask-project-manage-card{
         position: relative;

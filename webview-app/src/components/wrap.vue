@@ -7,8 +7,9 @@
                 'apm-shell--with-tabs': sourceList.length > 1,
                 'apm-shell--without-hud': !shouldShowHud,
             }"
+            :style="shellStyle"
         >
-            <div class="apm-shell__sticky">
+            <div ref="stickyRef" class="apm-shell__sticky">
                 <ProjectCommandHeader
                     v-model:search-keyword="searchKeyword"
                     :remove-group-title="groupActiveType === 'all' ? '删除全部分组' : '删除当前分组'"
@@ -64,6 +65,7 @@
                 <ProjectList
                     v-show="list.length > 0"
                     :list="list"
+                    :reserve-hud-space="shouldShowHud"
                     @item-click="handleItemClick"
                     @item-copy="copyProjectPath"
                     @item-edit="editProject"
@@ -110,6 +112,7 @@ import ProjectHudDashboard from "./projectHudDashboard.vue";
 import ProjectPreferenceSetting from "./preferenceSetting.vue";
 import ProjectOnboardingGuide from "./onboardingGuide.vue";
 import { useWrap } from "./useWrap"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 defineOptions({
     name: "ProjectManageWrap"
 })
@@ -143,6 +146,43 @@ const {
     onInfoDialogSure,
     toolBarRule
 } = useWrap();
+
+const stickyRef = ref<HTMLElement | null>(null);
+const stickySafeSpace = ref(108);
+let stickyResizeObserver: ResizeObserver | null = null;
+
+const updateStickySafeSpace = () => {
+    const stickyElement = stickyRef.value;
+    if (!stickyElement) {
+        return;
+    }
+    stickySafeSpace.value = Math.ceil(stickyElement.getBoundingClientRect().height + 18);
+};
+
+const shellStyle = computed(() => ({
+    "--apm-sticky-safe-space": `${stickySafeSpace.value}px`,
+}));
+
+onMounted(async () => {
+    await nextTick();
+    updateStickySafeSpace();
+    stickyResizeObserver = new ResizeObserver(updateStickySafeSpace);
+    if (stickyRef.value) {
+        stickyResizeObserver.observe(stickyRef.value);
+    }
+    window.addEventListener("resize", updateStickySafeSpace);
+});
+
+onBeforeUnmount(() => {
+    stickyResizeObserver?.disconnect();
+    stickyResizeObserver = null;
+    window.removeEventListener("resize", updateStickySafeSpace);
+});
+
+watch([() => sourceList.value.length, groupActiveType], async () => {
+    await nextTick();
+    updateStickySafeSpace();
+});
 
 </script>
 <style lang="scss" scoped>
@@ -181,16 +221,6 @@ const {
         overflow: hidden;
     }
 
-    .apm-shell--with-tabs {
-        --apm-sticky-safe-space: 150px;
-    }
-
-    .apm-shell--without-hud {
-        .apm-list {
-            padding-bottom: 56px;
-        }
-    }
-
     .apm-shell__sticky {
         position: absolute;
         top: 22px;
@@ -221,14 +251,14 @@ const {
     }
 
     .apm-list {
-        width: 100%;
+        width: auto;
         flex: 1;
         min-height: 0;
         min-width: 300px;
         position: relative;
         overflow-y: auto;
-        margin-inline: -24px;
-        padding: var(--apm-sticky-safe-space) 24px 420px;
+        margin: 0 -20px 0 -24px;
+        padding: var(--apm-sticky-safe-space) 20px 24px 24px;
         scrollbar-width: thin;
         scrollbar-color: color-mix(in srgb, var(--apm-radio-silence) 26%, transparent) transparent;
 
