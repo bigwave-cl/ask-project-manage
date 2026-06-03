@@ -4,7 +4,7 @@
     "description": "Project manager for Cursor and VS Code. Organize local folders, workspaces, project groups, search, backup, import and export projects.",
     "publisher": "ask-bobo",
     "icon": "dist-webview-app/logo.png",
-    "version": "1.0.4",
+    "version": "26.603.1",
     "engines": {
         "vscode": "^1.95.0"
     },
